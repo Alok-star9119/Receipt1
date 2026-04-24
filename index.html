@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPLR School</title>
+    <link rel="icon" type="image/png" href="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-container { margin: 0; padding: 0; box-shadow: none; width: 100%; }
+            @page { size: A4; margin: 10mm; }
+        }
+
+        .receipt-border { border: 2px solid #000; }
+        .input-inline { border: none; border-bottom: 1px dashed #ccc; width: 100%; background: transparent; }
+        .input-inline:focus { outline: none; border-bottom: 1px solid #000; }
+
+        .due-card { background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #f97316; }
+        .due-ok { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #22c55e; }
+        .due-overdue { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #ef4444; }
+
+        .fee-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- ============ CONTROLS ============ -->
+    <div class="no-print bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div class="flex items-center gap-3 mb-4">
+            <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
+                alt="Logo" class="w-12 h-12 rounded-full object-contain border border-gray-200 shadow-sm"
+                onerror="this.style.display='none'">
+            <h2 class="text-xl font-bold text-gray-800">Receipt Gaya Prasad Lokai Ram  School</h2>
+        </div>
+
+        <!-- Student Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Student Name</label>
+                <input type="text" id="ctrl-student" placeholder="Enter Name"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    oninput="syncFields()">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Parent Name</label>
+                <input type="text" id="ctrl-parent" placeholder="Enter Parent Name"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    oninput="syncFields()">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Class</label>
+                <select id="ctrl-class" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
+                    onchange="syncFields(); updateDuePanel()">
+                    <option value="Play">Play</option>
+                    <option value="Nur">Nursery</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <option value="1st">1st</option>
+                    <option value="2nd">2nd</option>
+                    <option value="3rd">3rd</option>
+                    <option value="4th">4th</option>
+                    <option value="5th">5th</option>
+                    <option value="6th">6th</option>
+                    <option value="7th">7th</option>
+                    <option value="8th">8th</option>
+                    <option value="9th">9th</option>
+                    <option value="10th">10th</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mode of Payment</label>
+                <select id="ctrl-mode" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    onchange="syncFields()">
+                    <option value="Cash">💵 Cash</option>
+                    <option value="GPay">GPay</option>
+                    <option value="PhonePe">PhonePe</option>
+                    <option value="BHIM Pay">BHIM Pay</option>
+                    <option value="Navi Pay">Navi Pay</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Net Banking">Net Banking</option>
+                    <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ===== DUE AMOUNT PANEL ===== -->
+        <div id="due-panel" class="mb-4 p-4 rounded-xl due-card">
+            <div class="flex flex-wrap justify-between items-start gap-3">
+                <div>
+                    <p class="text-sm font-semibold text-orange-700 mb-1">📋 Outstanding Due (up to current month)</p>
+                    <div id="due-breakdown" class="text-xs text-gray-600 space-y-1"></div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">Total Due</p>
+                    <p id="due-total" class="text-2xl font-bold text-red-600">₹0</p>
+                    <p id="due-months-label" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2" id="due-month-chips"></div>
+        </div>
+
+        <!-- ===== FEE ITEM SELECTOR ===== -->
+        <div class="border-t pt-4">
+            <h3 class="font-semibold mb-3 text-gray-800">Fee Items</h3>
+
+            <!-- Quick Add from Fee Structure -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                <p class="text-xs font-semibold text-blue-700 mb-2">⚡ Quick Add from Fee Structure</p>
+                <div class="flex flex-wrap gap-2 items-end">
+                    <div>
+                        <label class="text-xs text-gray-600">Fee Item</label>
+                        <select id="quick-item" onchange="onQuickItemChange()"
+                            class="block mt-1 p-1.5 border rounded text-sm border-gray-300">
+                            <option value="">-- Select Item --</option>
+                            <option value="Tution Fee">Tution Fee (Monthly)</option>
+                            <option value="Books Amount">Books Amount (One Time)</option>
+                            <option value="Computer Fee">Computer Fee (One Time)</option>
+                            <option value="Exam Fee">Exam Fee (One Time)</option>
+                            <option value="Notebooks">Notebooks</option>
+                            <option value="Stationary">Stationary</option>
+                            <option value="Diary & Tie Belt">Diary &amp; Tie Belt</option>
+                            <option value="ID Card">ID Card</option>
+                            <option value="Practical Exam">Practical Exam</option>
+                            <option value="Registration Fee">Registration Fee (One Time)</option>
+                            <option value="Custom">Custom / Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-600">Month</label>
+                        <select id="quick-month" class="block mt-1 p-1.5 border rounded text-sm border-gray-300">
+                            <option value="APR">APR</option><option value="MAY">MAY</option>
+                            <option value="JUN">JUN</option><option value="JUL">JUL</option>
+                            <option value="AUG">AUG</option><option value="SEP">SEP</option>
+                            <option value="OCT">OCT</option><option value="NOV">NOV</option>
+                            <option value="DEC">DEC</option><option value="JAN">JAN</option>
+                            <option value="FEB">FEB</option><option value="MAR">MAR</option>
+                        </select>
+                    </div>
+                    <div id="quick-amount-wrap">
+                        <label class="text-xs text-gray-600">Amount (auto-filled)</label>
+                        <input type="number" id="quick-amount" placeholder="₹"
+                            class="block mt-1 p-1.5 border rounded text-sm w-24 border-gray-300">
+                    </div>
+                    <button onclick="quickAddRow()"
+                        class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-blue-700">
+                        + Add Row
+                    </button>
+                </div>
+                <p id="quick-fee-hint" class="text-xs text-blue-600 mt-1 font-medium"></p>
+            </div>
+
+            <!-- Manual fee rows -->
+            <div id="fee-rows-input" class="space-y-2"></div>
+            <button onclick="addFeeRow()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 font-medium">+ Add Blank Row</button>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+            <button onclick="window.print()"
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                🖨️ Print Receipt
+            </button>
+            <button onclick="saveToHistory()"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                💾 Save &amp; Issue
+            </button>
+            <button onclick="exportToExcel()"
+                class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-900 transition">
+                📊 Export History
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ RECEIPT PREVIEW ============ -->
+    <div class="print-container bg-white receipt-border shadow-2xl mx-auto" style="width:100%;max-width:800px;">
+        <div class="p-4 flex flex-col items-center border-b-2 border-black">
+            <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
+                alt="GPLR School Logo"
+                class="w-20 h-20 object-contain mb-2 rounded-full border border-gray-200"
+                onerror="this.style.display='none'">
+            <h1 class="text-3xl font-bold uppercase tracking-wider text-center">Gaya Prasad Lokai Ram School</h1>
+            <p class="text-sm">Shahpur Itai, Utraula, Balrampur - 271609</p>
+        </div>
+
+        <div class="grid grid-cols-12 border-b-2 border-black font-semibold">
+            <div class="col-span-3 p-2 border-r border-black">Student Name :</div>
+            <div class="col-span-5 p-2 border-r border-black" id="view-student">—</div>
+            <div class="col-span-2 p-2 border-r border-black">Parent Name :</div>
+            <div class="col-span-2 p-2" id="view-parent">—</div>
+        </div>
+        <div class="grid grid-cols-12 border-b-2 border-black font-semibold">
+            <div class="col-span-3 p-2 border-r border-black">Class :</div>
+            <div class="col-span-5 p-2 border-r border-black" id="view-class">—</div>
+            <div class="col-span-2 p-2 border-r border-black">Mode :</div>
+            <div class="col-span-2 p-2" id="view-mode">Cash</div>
+        </div>
+
+        <div class="grid grid-cols-12 border-b border-black font-bold text-center bg-gray-50">
+            <div class="col-span-1 border-r border-black p-1">No</div>
+            <div class="col-span-1 border-r border-black p-1">Due For</div>
+            <div class="col-span-2 border-r border-black p-1">Installment</div>
+            <div class="col-span-6 border-r border-black p-1">Particulars</div>
+            <div class="col-span-2 p-1">Amount</div>
+        </div>
+
+        <div id="receipt-table-body" class="min-h-[150px]"></div>
+
+        <div class="grid grid-cols-12 border-t-2 border-black font-bold">
+            <div class="col-span-9 p-2 border-r border-black flex gap-2">
+                <span>Rupees in words:</span>
+                <span id="view-words" class="capitalize font-normal"></span>
+            </div>
+            <div class="col-span-1 p-2 border-r border-black text-center">Total</div>
+            <div class="col-span-2 p-2 text-right px-4" id="view-total">0</div>
+        </div>
+
+        <div class="grid grid-cols-12 border-t-2 border-black h-16">
+            <div class="col-span-1 border-r border-black flex items-center justify-center"></div>
+            <div class="col-span-1 border-r border-black flex items-center justify-center text-xs">Date</div>
+            <div class="col-span-2 border-r border-black flex items-center justify-center font-bold" id="view-date"></div>
+            <div class="col-span-8 flex items-center justify-center font-semibold italic">
+                Cashier ( <span id="view-cashier" class="px-2">Jyoti Verma</span> )
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HISTORY ============ -->
+    <div class="no-print bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <h2 class="text-xl font-bold mb-4">📁 Saved History</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="p-2 border">Date</th>
+                        <th class="p-2 border">Student</th>
+                        <th class="p-2 border">Class</th>
+                        <th class="p-2 border">Mode</th>
+                        <th class="p-2 border">Total</th>
+                        <th class="p-2 border">Items</th>
+                        <th class="p-2 border">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// =============================================
+//  FEE STRUCTURE (from image — 2026-27)
+// =============================================
+const FEE_STRUCTURE = {
+    Play: { registration: 1000, monthly: 400,  books: 1310, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    Nur:  { registration: 1000, monthly: 400,  books: 1760, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    LKG:  { registration: 1000, monthly: 450,  books: 2050, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    UKG:  { registration: 1000, monthly: 500,  books: 2270, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '1st':{ registration: 1200, monthly: 600,  books: 2715, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '2nd':{ registration: 1200, monthly: 600,  books: 2880, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '3rd':{ registration: 1200, monthly: 600,  books: 3015, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '4th':{ registration: 1500, monthly: 650,  books: 3260, examFee: 300, computerFee: 200, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '5th':{ registration: 1500, monthly: 650,  books: 3430, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '6th':{ registration: 1500, monthly: 700,  books: 4030, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '7th':{ registration: 1500, monthly: 700,  books: 4245, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '8th':{ registration: 1500, monthly: 700,  books: 4390, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    '9th':{ registration: 1500, monthly: 900,  books: 1831, examFee: 600, computerFee: 700, notebooks: 540, stationary: 0, diary: 200, idCard: 100, practical: 1000 },
+    '10th':{ registration:1500, monthly: 900,  books: 1831, examFee: 600, computerFee: 700, notebooks: 540, stationary: 0, diary: 200, idCard: 100, practical: 1000 },
+};
+
+// Map selector values to fee structure keys
+const ITEM_TO_FEE_KEY = {
+    'Tution Fee':      'monthly',
+    'Books Amount':    'books',
+    'Computer Fee':    'computerFee',
+    'Exam Fee':        'examFee',
+    'Notebooks':       'notebooks',
+    'Stationary':      'stationary',
+    'Diary & Tie Belt':'diary',
+    'ID Card':         'idCard',
+    'Practical Exam':  'practical',
+    'Registration Fee':'registration',
+};
+
+const months = ['APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR'];
+
+// School year starts April. Returns months from APR up to & including current academic month.
+function getMonthsUpToCurrent() {
+    const now = new Date();
+    const calMonth = now.getMonth(); // 0=Jan
+    // Academic month index (APR=0 ... MAR=11)
+    const acaIndex = (calMonth - 3 + 12) % 12; // APR→0, MAY→1 ...
+    return months.slice(0, acaIndex + 1);
+}
+
+// =============================================
+//  STATE
+// =============================================
+let feeItems = [];
+let history = JSON.parse(localStorage.getItem('receipt_history')) || [];
+let nextId = 100;
+
+// =============================================
+//  INIT
+// =============================================
+function init() {
+    const today = new Date();
+    const dateStr = today.getDate().toString().padStart(2,'0') + '-' +
+                    (today.getMonth()+1).toString().padStart(2,'0') + '-' +
+                    today.getFullYear();
+    document.getElementById('view-date').innerText = dateStr;
+
+    // Set quick-month to current academic month
+    const acaIdx = (today.getMonth() - 3 + 12) % 12;
+    document.getElementById('quick-month').value = months[acaIdx];
+
+    renderFeeRows();
+    renderHistory();
+    syncFields();
+    updateDuePanel();
+}
+
+// =============================================
+//  QUICK ADD FROM FEE STRUCTURE
+// =============================================
+function onQuickItemChange() {
+    const item = document.getElementById('quick-item').value;
+    const cls  = document.getElementById('ctrl-class').value;
+    const hint = document.getElementById('quick-fee-hint');
+    const amtEl = document.getElementById('quick-amount');
+
+    if (!item || item === 'Custom' || !FEE_STRUCTURE[cls]) {
+        hint.textContent = '';
+        amtEl.value = '';
+        return;
+    }
+    const key = ITEM_TO_FEE_KEY[item];
+    const amt = key ? (FEE_STRUCTURE[cls][key] || 0) : 0;
+    amtEl.value = amt;
+    hint.textContent = `💡 Fee for ${cls}: ₹${amt}`;
+}
+
+function quickAddRow() {
+    const item  = document.getElementById('quick-item').value;
+    const month = document.getElementById('quick-month').value;
+    const amt   = parseFloat(document.getElementById('quick-amount').value) || 0;
+
+    if (!item) { alert('Please select a fee item.'); return; }
+    const particular = item === 'Custom' ? 'Other Fee' : item;
+
+    feeItems.push({ id: nextId++, month, particular, amount: amt });
+    renderFeeRows();
+
+    // Reset quick-add
+    document.getElementById('quick-item').value = '';
+    document.getElementById('quick-amount').value = '';
+    document.getElementById('quick-fee-hint').textContent = '';
+}
+
+// =============================================
+//  DUE PANEL
+// =============================================
+function updateDuePanel() {
+    const cls = document.getElementById('ctrl-class').value;
+    const fees = FEE_STRUCTURE[cls];
+    if (!fees) return;
+
+    const coveredMonths = getMonthsUpToCurrent();
+    const monthlyFee = fees.monthly;
+    const paidMonths = getPaidMonthsFromHistory(cls);
+
+    // Which months are unpaid up to current?
+    const unpaidMonths = coveredMonths.filter(m => !paidMonths.includes(m));
+    const dueAmount = unpaidMonths.length * monthlyFee;
+
+    const panel = document.getElementById('due-panel');
+    const breakdown = document.getElementById('due-breakdown');
+    const totalEl = document.getElementById('due-total');
+    const label = document.getElementById('due-months-label');
+    const chips = document.getElementById('due-month-chips');
+
+    totalEl.textContent = '₹' + dueAmount;
+    label.textContent = `Monthly fee: ₹${monthlyFee} × ${unpaidMonths.length} unpaid month(s)`;
+
+    breakdown.innerHTML = `
+        <span>Months checked: <b>${coveredMonths.join(', ')}</b></span><br>
+        <span>Paid months (from history): <b>${paidMonths.length > 0 ? paidMonths.join(', ') : 'None'}</b></span>
+    `;
+
+    chips.innerHTML = coveredMonths.map(m => {
+        const paid = paidMonths.includes(m);
+        return `<span class="fee-chip ${paid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${m} ${paid ? '✓' : '✗'}</span>`;
+    }).join('');
+
+    panel.className = `mb-4 p-4 rounded-xl ${dueAmount === 0 ? 'due-ok' : 'due-overdue'}`;
+    if (dueAmount === 0) totalEl.className = 'text-2xl font-bold text-green-600';
+    else totalEl.className = 'text-2xl font-bold text-red-600';
+}
+
+function getPaidMonthsFromHistory(cls) {
+    // Look through saved receipts for this student + class, find which months Tution Fee was paid
+    const studentName = document.getElementById('ctrl-student').value.trim().toLowerCase();
+    const paid = new Set();
+    history.forEach(rec => {
+        if (rec.class === cls && rec.student.trim().toLowerCase() === studentName) {
+            rec.items.forEach(item => {
+                if (item.particular && item.particular.toLowerCase().includes('tution')) {
+                    paid.add(item.month);
+                }
+            });
+        }
+    });
+    return [...paid];
+}
+
+// =============================================
+//  FEE ROWS
+// =============================================
+function addFeeRow() {
+    const lastMonth = feeItems.length > 0 ? feeItems[feeItems.length-1].month : 'APR';
+    const nextMonth = months[(months.indexOf(lastMonth)+1) % 12];
+    feeItems.push({ id: nextId++, month: nextMonth, particular: 'Tution Fee', amount: 0 });
+    renderFeeRows();
+}
+
+function removeFeeRow(id) {
+    feeItems = feeItems.filter(i => i.id !== id);
+    renderFeeRows();
+}
+
+function updateFee(id, field, value) {
+    const item = feeItems.find(i => i.id === id);
+    if (item) {
+        item[field] = field === 'amount' ? parseFloat(value)||0 : value;
+        syncCalculations();
+        // Re-render receipt side only
+        renderReceiptBody();
+    }
+}
+
+function renderFeeRows(reRenderInputs = true) {
+    const container = document.getElementById('fee-rows-input');
+
+    if (reRenderInputs) {
+        container.innerHTML = feeItems.map(item => `
+            <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border">
+                <select onchange="updateFee(${item.id},'month',this.value)" class="p-1 border rounded text-xs">
+                    ${months.map(m => `<option value="${m}" ${item.month===m?'selected':''}>${m}</option>`).join('')}
+                </select>
+                <select onchange="onRowItemChange(${item.id}, this.value)" class="p-1 border rounded text-sm flex-grow">
+                    <option value="">-- Particular --</option>
+                    <option ${item.particular==='Tution Fee'?'selected':''}>Tution Fee</option>
+                    <option ${item.particular==='Books Amount'?'selected':''}>Books Amount</option>
+                    <option ${item.particular==='Computer Fee'?'selected':''}>Computer Fee</option>
+                    <option ${item.particular==='Exam Fee'?'selected':''}>Exam Fee</option>
+                    <option ${item.particular==='Notebooks'?'selected':''}>Notebooks</option>
+                    <option ${item.particular==='Stationary'?'selected':''}>Stationary</option>
+                    <option ${item.particular==='Diary & Tie Belt'?'selected':''}>Diary &amp; Tie Belt</option>
+                    <option ${item.particular==='ID Card'?'selected':''}>ID Card</option>
+                    <option ${item.particular==='Practical Exam'?'selected':''}>Practical Exam</option>
+                    <option ${item.particular==='Registration Fee'?'selected':''}>Registration Fee</option>
+                    <option value="custom" ${!Object.keys(ITEM_TO_FEE_KEY).includes(item.particular)?'selected':''}>Other / Custom</option>
+                </select>
+                <input type="number" value="${item.amount}"
+                    oninput="updateFee(${item.id},'amount',this.value)"
+                    placeholder="Amt" class="w-24 p-1 border rounded text-sm">
+                <button onclick="removeFeeRow(${item.id})" class="text-red-500 font-bold px-2 text-lg">×</button>
+            </div>
+        `).join('');
+    }
+
+    renderReceiptBody();
+    syncCalculations();
+}
+
+function onRowItemChange(id, value) {
+    const item = feeItems.find(i => i.id === id);
+    if (!item) return;
+
+    if (value && value !== 'custom') {
+        item.particular = value;
+        const cls = document.getElementById('ctrl-class').value;
+        const key = ITEM_TO_FEE_KEY[value];
+        if (key && FEE_STRUCTURE[cls]) {
+            item.amount = FEE_STRUCTURE[cls][key] || 0;
+        }
+    } else if (value === 'custom') {
+        item.particular = 'Other Fee';
+    }
+    renderFeeRows();
+}
+
+function renderReceiptBody() {
+    const receiptBody = document.getElementById('receipt-table-body');
+    receiptBody.innerHTML = feeItems.map((item, index) => `
+        <div class="grid grid-cols-12 border-b border-black text-center min-h-[32px]">
+            <div class="col-span-1 border-r border-black p-1">${index+1}</div>
+            <div class="col-span-1 border-r border-black p-1"></div>
+            <div class="col-span-2 border-r border-black p-1 font-semibold">${item.month}</div>
+            <div class="col-span-6 border-r border-black p-1 text-left px-4">${item.particular}</div>
+            <div class="col-span-2 p-1 text-right px-4 font-semibold">${item.amount}</div>
+        </div>
+    `).join('');
+
+    const fillerCount = Math.max(0, 5 - feeItems.length);
+    for (let i=0; i<fillerCount; i++) {
+        receiptBody.innerHTML += `
+            <div class="grid grid-cols-12 border-b border-black min-h-[32px]">
+                <div class="col-span-1 border-r border-black"></div>
+                <div class="col-span-1 border-r border-black"></div>
+                <div class="col-span-2 border-r border-black"></div>
+                <div class="col-span-6 border-r border-black"></div>
+                <div class="col-span-2"></div>
+            </div>`;
+    }
+}
+
+// =============================================
+//  SYNC
+// =============================================
+function syncFields() {
+    document.getElementById('view-student').innerText = document.getElementById('ctrl-student').value || '—';
+    document.getElementById('view-parent').innerText  = document.getElementById('ctrl-parent').value  || '—';
+    document.getElementById('view-class').innerText   = document.getElementById('ctrl-class').value;
+    document.getElementById('view-mode').innerText    = document.getElementById('ctrl-mode').value;
+    onQuickItemChange();
+    updateDuePanel();
+}
+
+function syncCalculations() {
+    const total = feeItems.reduce((sum, i) => sum + i.amount, 0);
+    document.getElementById('view-total').innerText = total;
+    document.getElementById('view-words').innerText = numberToWords(total) + ' Rupee only';
+}
+
+// =============================================
+//  NUMBER TO WORDS
+// =============================================
+function numberToWords(num) {
+    const a = ['','one ','two ','three ','four ','five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
+    const b = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+    if ((num = num.toString()).length > 9) return 'overflow';
+    let n = ('000000000'+num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!n) return '';
+    let str = '';
+    str += (n[1]!=0) ? (a[Number(n[1])]||b[n[1][0]]+' '+a[n[1][1]])+'crore ' : '';
+    str += (n[2]!=0) ? (a[Number(n[2])]||b[n[2][0]]+' '+a[n[2][1]])+'lakh ' : '';
+    str += (n[3]!=0) ? (a[Number(n[3])]||b[n[3][0]]+' '+a[n[3][1]])+'thousand ' : '';
+    str += (n[4]!=0) ? (a[Number(n[4])]||b[n[4][0]]+' '+a[n[4][1]])+'hundred ' : '';
+    str += (n[5]!=0) ? ((str!='') ? 'and ' : '')+(a[Number(n[5])]||b[n[5][0]]+' '+a[n[5][1]]) : '';
+    return str.trim();
+}
+
+// =============================================
+//  HISTORY
+// =============================================
+function saveToHistory() {
+    const student = document.getElementById('ctrl-student').value.trim();
+    if (!student) { alert('Please enter student name.'); return; }
+    if (feeItems.length === 0) { alert('Please add fee items.'); return; }
+
+    const record = {
+        id: Date.now(),
+        date: document.getElementById('view-date').innerText,
+        student,
+        parent: document.getElementById('ctrl-parent').value,
+        class:  document.getElementById('ctrl-class').value,
+        mode:   document.getElementById('ctrl-mode').value,
+        total:  document.getElementById('view-total').innerText,
+        items:  [...feeItems]
+    };
+    history.unshift(record);
+    localStorage.setItem('receipt_history', JSON.stringify(history));
+    renderHistory();
+    updateDuePanel();
+    alert('✅ Receipt saved!');
+}
+
+function renderHistory() {
+    const body = document.getElementById('history-table-body');
+    body.innerHTML = history.map(rec => `
+        <tr class="hover:bg-gray-50">
+            <td class="p-2 border text-xs">${rec.date}</td>
+            <td class="p-2 border font-medium">${rec.student}</td>
+            <td class="p-2 border">${rec.class}</td>
+            <td class="p-2 border text-xs">${rec.mode || 'Cash'}</td>
+            <td class="p-2 border font-bold text-green-700">₹${rec.total}</td>
+            <td class="p-2 border text-xs text-gray-500">${rec.items.map(i=>i.particular+'('+i.month+')').join(', ')}</td>
+            <td class="p-2 border">
+                <button onclick="loadRecord(${rec.id})" class="text-blue-600 mr-2 underline text-xs">Load</button>
+                <button onclick="deleteRecord(${rec.id})" class="text-red-600 underline text-xs">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function loadRecord(id) {
+    const rec = history.find(h => h.id === id);
+    if (rec) {
+        document.getElementById('ctrl-student').value = rec.student;
+        document.getElementById('ctrl-parent').value  = rec.parent;
+        document.getElementById('ctrl-class').value   = rec.class;
+        if (rec.mode) document.getElementById('ctrl-mode').value = rec.mode;
+        feeItems = rec.items.map(i => ({ ...i }));
+        renderFeeRows();
+        syncFields();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function deleteRecord(id) {
+    if (confirm('Delete this record?')) {
+        history = history.filter(h => h.id !== id);
+        localStorage.setItem('receipt_history', JSON.stringify(history));
+        renderHistory();
+    }
+}
+
+function exportToExcel() {
+    if (history.length === 0) { alert('No history to export.'); return; }
+    let csv = 'data:text/csv;charset=utf-8,Date,Student,Parent,Class,Total,Items\n';
+    history.forEach(rec => {
+        const items = rec.items.map(i => `${i.month}:${i.particular}(${i.amount})`).join(' | ');
+        csv += [rec.date, `"${rec.student}"`, `"${rec.parent}"`, rec.class, rec.total, `"${items}"`].join(',') + '\n';
+    });
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csv));
+    link.setAttribute('download', `gplr_receipts_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
