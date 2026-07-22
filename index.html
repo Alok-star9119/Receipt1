@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPLR School</title>
+    <title>GPLR School — Fee Ledger</title>
     <link rel="icon" type="image/png" href="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+        :root {
+            --ink-navy: #1B2A4A;
+            --ink-navy-dark: #10192E;
+            --paper: #F6F3EA;
+            --brass: #B98418;
+            --brass-dark: #8F6512;
+            --maroon: #8B2635;
+            --ledger-green: #2F6B3A;
+            --line: #D8D2C2;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px);
+            background-size: 100% 2.1rem;
+            background-attachment: local;
+        }
+        .font-display { font-family: 'Fraunces', serif; }
+        .font-mono-amt { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
 
         @media print {
-            body { background-color: white; }
+            body { background: white; background-image: none; }
             .no-print { display: none !important; }
             .print-container { margin: 0; padding: 0; box-shadow: none; width: 100%; }
             @page { size: A4; margin: 10mm; }
@@ -26,33 +48,88 @@
         .due-overdue { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #ef4444; }
 
         .fee-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+        .masthead {
+            background: linear-gradient(135deg, var(--ink-navy), var(--ink-navy-dark));
+            border-radius: 0.9rem;
+            box-shadow: 0 10px 30px -12px rgba(27,42,74,0.5);
+        }
+        .brass-btn {
+            background: var(--brass);
+            color: #2b1c02;
+        }
+        .brass-btn:hover { background: var(--brass-dark); }
+        .navy-btn { background: var(--ink-navy); color: #fff; }
+        .navy-btn:hover { background: var(--ink-navy-dark); }
+        .maroon-btn { background: var(--maroon); color: #fff; }
+        .maroon-btn:hover { background: #6f1e2a; }
+
+        .panel-card {
+            background: #fff;
+            border: 1px solid #E7E1D2;
+            box-shadow: 0 1px 2px rgba(27,42,74,0.04);
+        }
+        .section-rule {
+            border-bottom: 2px solid var(--ink-navy);
+            padding-bottom: 0.4rem;
+        }
+        .conn-dot { width:8px; height:8px; border-radius:999px; display:inline-block; margin-right:6px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
 <div class="max-w-4xl mx-auto space-y-6">
 
-    <!-- ============ CONTROLS ============ -->
-    <div class="no-print bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <div class="flex items-center gap-3 mb-4">
-            <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
-                alt="Logo" class="w-12 h-12 rounded-full object-contain border border-gray-200 shadow-sm"
-                onerror="this.style.display='none'">
-            <h2 class="text-xl font-bold text-gray-800">Receipt Gaya Prasad Lokai Ram  School</h2>
+    <!-- ============ MASTHEAD ============ -->
+    <div class="no-print masthead p-5 md:p-6 text-white">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-4">
+                <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
+                    alt="Logo" class="w-14 h-14 rounded-full object-contain border-2 shadow-sm" style="border-color: var(--brass);"
+                    onerror="this.style.display='none'">
+                <div>
+                    <h1 class="font-display text-xl md:text-2xl font-semibold tracking-wide">Gaya Prasad Lokai Ram School</h1>
+                    <p class="text-xs md:text-sm" style="color:#D8C48A;">Fee Receipt &amp; Ledger System</p>
+                </div>
+            </div>
+            <div id="conn-badge" class="fee-chip bg-white/10 text-white">● checking…</div>
         </div>
+    </div>
+
+    <!-- ============ DATABASE CONNECTION ============ -->
+    <div class="no-print panel-card rounded-xl p-4">
+        <div class="flex flex-wrap items-center gap-3">
+            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Database server URL</label>
+            <input type="text" id="api-base-input" placeholder="http://localhost:4000"
+                class="text-sm border rounded p-1.5 flex-grow min-w-[220px] border-gray-300">
+            <button onclick="updateApiBase()" class="navy-btn text-xs px-3 py-1.5 rounded font-semibold">Save &amp; Reconnect</button>
+            <button onclick="checkConnection()" class="text-xs px-3 py-1.5 rounded font-semibold border border-gray-300 hover:bg-gray-50">↻ Retry</button>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">When connected, every receipt, concession, and receipt number is saved permanently in MongoDB. If the server can't be reached, this page automatically falls back to saving in this browser only, so you never lose a receipt while offline.</p>
+    </div>
+
+    <!-- ============ CONTROLS ============ -->
+    <div class="no-print panel-card p-6 rounded-xl">
 
         <!-- Student Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Student Name</label>
                 <input type="text" id="ctrl-student" placeholder="Enter Name"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-2"
+                    style="--tw-ring-color: var(--ink-navy);"
+                    oninput="syncFields()">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Student ID <span class="text-gray-400 font-normal">(optional, recommended)</span></label>
+                <input type="text" id="ctrl-studentid" placeholder="e.g. GPLR-2026-045"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
                     oninput="syncFields()">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Parent Name</label>
                 <input type="text" id="ctrl-parent" placeholder="Enter Parent Name"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
                     oninput="syncFields()">
             </div>
             <div>
@@ -77,7 +154,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Mode of Payment</label>
-                <select id="ctrl-mode" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                <select id="ctrl-mode" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
                     onchange="syncFields()">
                     <option value="Cash">💵 Cash</option>
                     <option value="GPay">GPay</option>
@@ -88,6 +165,12 @@
                     <option value="Net Banking">Net Banking</option>
                     <option value="Cheque">Cheque</option>
                 </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Receipt Date</label>
+                <input type="date" id="ctrl-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
+                    onchange="syncFields()">
+                <p class="text-xs text-gray-400 mt-1">Defaults to today — change to cut a receipt for a previous date.</p>
             </div>
         </div>
 
@@ -100,19 +183,58 @@
                 </div>
                 <div class="text-right">
                     <p class="text-xs text-gray-500">Total Due</p>
-                    <p id="due-total" class="text-2xl font-bold text-red-600">₹0</p>
+                    <p id="due-total" class="text-2xl font-bold font-mono-amt text-red-600">₹0</p>
                     <p id="due-months-label" class="text-xs text-gray-500 mt-1"></p>
                 </div>
             </div>
             <div class="mt-3 flex flex-wrap gap-2" id="due-month-chips"></div>
         </div>
 
+        <!-- ===== CONCESSION PANEL ===== -->
+        <div class="no-print mb-4 p-4 rounded-xl border" style="background:#FBF4E2; border-color: var(--brass);" id="concession-panel">
+            <h3 class="font-display font-semibold mb-1" style="color: var(--brass-dark);">🎓 Concession / Discount — Permanent Student Setting</h3>
+            <p class="text-xs text-gray-600 mb-2">Saved against this Student ID/Name + Class. It does <b>not</b> depend on date or receipt — it stays applied automatically to every future fee item of that type for this student, until you remove it here.</p>
+            <div class="flex flex-wrap gap-2 items-end mb-3">
+                <div>
+                    <label class="text-xs text-gray-600">Particular</label>
+                    <select id="conc-particular" class="block mt-1 p-1.5 border rounded text-sm">
+                        <option>Tution Fee</option>
+                        <option>Books Amount</option>
+                        <option>Computer Fee</option>
+                        <option>Exam Fee</option>
+                        <option>Notebooks</option>
+                        <option>Stationary</option>
+                        <option>Diary & Tie Belt</option>
+                        <option>ID Card</option>
+                        <option>Practical Exam</option>
+                        <option>Registration Fee</option>
+                        <option>Transport Fee</option>
+                        <option>Shirt Fee</option>
+                        <option>Renewal Fee</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-600">Type</label>
+                    <select id="conc-type" class="block mt-1 p-1.5 border rounded text-sm">
+                        <option value="percent">% Percent</option>
+                        <option value="flat">₹ Flat Amount</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-600">Value</label>
+                    <input type="number" id="conc-value" placeholder="e.g. 10" class="block mt-1 p-1.5 border rounded text-sm w-24">
+                </div>
+                <button onclick="saveConcession()" class="brass-btn px-3 py-1.5 rounded text-sm font-semibold">+ Save Concession</button>
+            </div>
+            <div id="concession-list" class="flex flex-wrap gap-2"></div>
+        </div>
+
         <!-- ===== FEE ITEM SELECTOR ===== -->
-        <div class="border-t pt-4">
-            <h3 class="font-semibold mb-3 text-gray-800">Fee Items</h3>
+        <div class="border-t pt-4" style="border-color: var(--line);">
+            <h3 class="font-display font-semibold mb-3 text-gray-800 section-rule inline-block">Fee Items</h3>
 
             <!-- Quick Add from Fee Structure -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3 mt-2">
                 <p class="text-xs font-semibold text-blue-700 mb-2">⚡ Quick Add from Fee Structure</p>
                 <div class="flex flex-wrap gap-2 items-end">
                     <div>
@@ -130,6 +252,9 @@
                             <option value="ID Card">ID Card</option>
                             <option value="Practical Exam">Practical Exam</option>
                             <option value="Registration Fee">Registration Fee (One Time)</option>
+                            <option value="Transport Fee">Transport Fee</option>
+                            <option value="Shirt Fee">Shirt Fee</option>
+                            <option value="Renewal Fee">Renewal Fee</option>
                             <option value="Custom">Custom / Other</option>
                         </select>
                     </div>
@@ -147,10 +272,10 @@
                     <div id="quick-amount-wrap">
                         <label class="text-xs text-gray-600">Amount (auto-filled)</label>
                         <input type="number" id="quick-amount" placeholder="₹"
-                            class="block mt-1 p-1.5 border rounded text-sm w-24 border-gray-300">
+                            class="block mt-1 p-1.5 border rounded text-sm w-24 border-gray-300 font-mono-amt">
                     </div>
                     <button onclick="quickAddRow()"
-                        class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-blue-700">
+                        class="navy-btn px-3 py-1.5 rounded text-sm font-semibold">
                         + Add Row
                     </button>
                 </div>
@@ -162,19 +287,27 @@
             <button onclick="addFeeRow()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 font-medium">+ Add Blank Row</button>
         </div>
 
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="mt-6 flex flex-wrap gap-3 items-center">
             <button onclick="window.print()"
-                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                class="border-2 px-6 py-2 rounded-lg font-bold transition" style="border-color: var(--ink-navy); color: var(--ink-navy);">
                 🖨️ Print Receipt
             </button>
             <button onclick="saveToHistory()"
-                class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+                class="navy-btn px-6 py-2 rounded-lg font-bold transition">
                 💾 Save &amp; Issue
             </button>
             <button onclick="exportToExcel()"
-                class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-900 transition">
-                📊 Export History
+                class="brass-btn px-6 py-2 rounded-lg font-bold transition">
+                📊 Export to Excel
             </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">💡 When connected to the database, every save is permanent and shared across computers. If offline, this page keeps working using the browser's own storage as a safety net — export to Excel regularly either way.</p>
+
+        <!-- ===== IMPORT PREVIOUS RECEIPTS ===== -->
+        <div class="mt-4 p-3 border border-dashed rounded-lg" style="border-color: var(--line);">
+            <label class="block text-sm font-medium text-gray-700 mb-1">📥 Import Previous Receipts (.csv or .xlsx exported from this system)</label>
+            <input type="file" id="import-file" accept=".csv,.xlsx" onchange="importReceipts(event)" class="text-sm">
+            <p class="text-xs text-gray-500 mt-1">Use this to restore old records or continue receipt numbering on a new device/browser without losing history.</p>
         </div>
     </div>
 
@@ -185,8 +318,15 @@
                 alt="GPLR School Logo"
                 class="w-20 h-20 object-contain mb-2 rounded-full border border-gray-200"
                 onerror="this.style.display='none'">
-            <h1 class="text-3xl font-bold uppercase tracking-wider text-center">Gaya Prasad Lokai Ram School</h1>
+            <h1 class="font-display text-3xl font-bold uppercase tracking-wider text-center">Gaya Prasad Lokai Ram School</h1>
             <p class="text-sm">Shahpur Itai, Utraula, Balrampur - 271609</p>
+        </div>
+
+        <div class="grid grid-cols-12 border-b-2 border-black font-semibold text-sm">
+            <div class="col-span-3 p-2 border-r border-black">Receipt No :</div>
+            <div class="col-span-3 p-2 border-r border-black font-mono-amt" id="view-receiptno">—</div>
+            <div class="col-span-2 p-2 border-r border-black">Student ID :</div>
+            <div class="col-span-4 p-2" id="view-studentid">—</div>
         </div>
 
         <div class="grid grid-cols-12 border-b-2 border-black font-semibold">
@@ -218,13 +358,13 @@
                 <span id="view-words" class="capitalize font-normal"></span>
             </div>
             <div class="col-span-1 p-2 border-r border-black text-center">Total</div>
-            <div class="col-span-2 p-2 text-right px-4" id="view-total">0</div>
+            <div class="col-span-2 p-2 text-right px-4 font-mono-amt" id="view-total">0</div>
         </div>
 
         <div class="grid grid-cols-12 border-t-2 border-black h-16">
             <div class="col-span-1 border-r border-black flex items-center justify-center"></div>
             <div class="col-span-1 border-r border-black flex items-center justify-center text-xs">Date</div>
-            <div class="col-span-2 border-r border-black flex items-center justify-center font-bold" id="view-date"></div>
+            <div class="col-span-2 border-r border-black flex items-center justify-center font-bold font-mono-amt" id="view-date"></div>
             <div class="col-span-8 flex items-center justify-center font-semibold italic">
                 Cashier ( <span id="view-cashier" class="px-2">Jyoti Verma</span> )
             </div>
@@ -232,12 +372,13 @@
     </div>
 
     <!-- ============ HISTORY ============ -->
-    <div class="no-print bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <h2 class="text-xl font-bold mb-4">📁 Saved History</h2>
-        <div class="overflow-x-auto">
+    <div class="no-print panel-card p-6 rounded-xl">
+        <h2 class="font-display text-xl font-semibold mb-4 section-rule inline-block">📁 Saved History</h2>
+        <div class="overflow-x-auto mt-2">
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
-                    <tr class="bg-gray-100">
+                    <tr style="background: var(--ink-navy); color:#fff;">
+                        <th class="p-2 border">Receipt No</th>
                         <th class="p-2 border">Date</th>
                         <th class="p-2 border">Student</th>
                         <th class="p-2 border">Class</th>
@@ -256,6 +397,8 @@
 <script>
 // =============================================
 //  FEE STRUCTURE (from image — 2026-27)
+//  Transport Fee / Shirt Fee / Renewal Fee have no fixed structure
+//  per class in the source data, so they are entered manually.
 // =============================================
 const FEE_STRUCTURE = {
     Play: { registration: 1000, monthly: 400,  books: 1310, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
@@ -274,7 +417,6 @@ const FEE_STRUCTURE = {
     '10th':{ registration:1500, monthly: 900,  books: 1831, examFee: 600, computerFee: 700, notebooks: 540, stationary: 0, diary: 200, idCard: 100, practical: 1000 },
 };
 
-// Map selector values to fee structure keys
 const ITEM_TO_FEE_KEY = {
     'Tution Fee':      'monthly',
     'Books Amount':    'books',
@@ -286,16 +428,20 @@ const ITEM_TO_FEE_KEY = {
     'ID Card':         'idCard',
     'Practical Exam':  'practical',
     'Registration Fee':'registration',
+    'Transport Fee':   'transport',
+    'Shirt Fee':       'shirt',
+    'Renewal Fee':     'renewal',
 };
 
 const months = ['APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR'];
+const RECEIPT_COUNTER_KEY = 'gplr_receipt_counter';
+const CONCESSION_KEY = 'gplr_concessions';
+const DEFAULT_API_BASE = 'http://localhost:4000';
 
-// School year starts April. Returns months from APR up to & including current academic month.
 function getMonthsUpToCurrent() {
     const now = new Date();
-    const calMonth = now.getMonth(); // 0=Jan
-    // Academic month index (APR=0 ... MAR=11)
-    const acaIndex = (calMonth - 3 + 12) % 12; // APR→0, MAY→1 ...
+    const calMonth = now.getMonth();
+    const acaIndex = (calMonth - 3 + 12) % 12;
     return months.slice(0, acaIndex + 1);
 }
 
@@ -303,27 +449,305 @@ function getMonthsUpToCurrent() {
 //  STATE
 // =============================================
 let feeItems = [];
-let history = JSON.parse(localStorage.getItem('receipt_history')) || [];
+let history = [];
 let nextId = 100;
+let API_BASE = localStorage.getItem('gplr_api_base') || DEFAULT_API_BASE;
+let usingLocalFallback = false;
+let currentConcessionMap = {};
+
+// =============================================
+//  API HELPERS (with automatic local fallback)
+// =============================================
+async function apiGet(path) {
+    const res = await fetch(API_BASE + path);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    return res.json();
+}
+async function apiPost(path, body) {
+    const res = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('API error ' + res.status);
+    return res.json();
+}
+async function apiDelete(path) {
+    const res = await fetch(API_BASE + path, { method: 'DELETE' });
+    if (!res.ok) throw new Error('API error ' + res.status);
+    return res.json();
+}
+
+function updateConnectionBadge() {
+    const badge = document.getElementById('conn-badge');
+    if (usingLocalFallback) {
+        badge.innerHTML = '<span class="conn-dot" style="background:#f59e0b;"></span>Offline — saved in this browser only';
+        badge.className = 'fee-chip bg-amber-500/20 text-amber-100';
+    } else {
+        badge.innerHTML = '<span class="conn-dot" style="background:#22c55e;"></span>Connected — MongoDB';
+        badge.className = 'fee-chip bg-green-500/20 text-green-100';
+    }
+}
+
+async function checkConnection() {
+    document.getElementById('conn-badge').innerHTML = '<span class="conn-dot" style="background:#94a3b8;"></span>checking…';
+    try {
+        await apiGet('/api/receipts/next-number');
+        usingLocalFallback = false;
+    } catch (e) {
+        usingLocalFallback = true;
+    }
+    updateConnectionBadge();
+    await loadHistory();
+    await refreshConcessionsCache();
+}
+
+function updateApiBase() {
+    const val = document.getElementById('api-base-input').value.trim() || DEFAULT_API_BASE;
+    API_BASE = val.replace(/\/$/, '');
+    localStorage.setItem('gplr_api_base', API_BASE);
+    checkConnection();
+}
 
 // =============================================
 //  INIT
 // =============================================
-function init() {
+async function init() {
     const today = new Date();
-    const dateStr = today.getDate().toString().padStart(2,'0') + '-' +
-                    (today.getMonth()+1).toString().padStart(2,'0') + '-' +
-                    today.getFullYear();
-    document.getElementById('view-date').innerText = dateStr;
+    const iso = today.getFullYear() + '-' +
+                (today.getMonth()+1).toString().padStart(2,'0') + '-' +
+                today.getDate().toString().padStart(2,'0');
+    document.getElementById('ctrl-date').value = iso;
+    document.getElementById('api-base-input').value = API_BASE;
 
-    // Set quick-month to current academic month
     const acaIdx = (today.getMonth() - 3 + 12) % 12;
     document.getElementById('quick-month').value = months[acaIdx];
 
     renderFeeRows();
-    renderHistory();
+    await checkConnection(); // loads history + concessions, sets badge
     syncFields();
+}
+
+// =============================================
+//  DATE HELPERS
+// =============================================
+function formatDateForDisplay(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}-${m}-${y}`;
+}
+function isoFromDisplay(disp) {
+    if (!disp) return '';
+    const [d, m, y] = disp.split('-');
+    if (!d || !m || !y) return '';
+    return `${y}-${m}-${d}`;
+}
+
+// =============================================
+//  HISTORY (MongoDB via API, with localStorage fallback)
+// =============================================
+async function loadHistory() {
+    try {
+        history = await apiGet('/api/receipts');
+        usingLocalFallback = false;
+    } catch (e) {
+        history = JSON.parse(localStorage.getItem('receipt_history')) || [];
+        usingLocalFallback = true;
+    }
+    renderHistory();
+    updateConnectionBadge();
+}
+
+async function saveToHistory() {
+    const student = document.getElementById('ctrl-student').value.trim();
+    if (!student) { alert('Please enter student name.'); return; }
+    if (feeItems.length === 0) { alert('Please add fee items.'); return; }
+
+    const record = {
+        date: formatDateForDisplay(document.getElementById('ctrl-date').value),
+        studentId: document.getElementById('ctrl-studentid').value.trim(),
+        student,
+        parent: document.getElementById('ctrl-parent').value,
+        class:  document.getElementById('ctrl-class').value,
+        mode:   document.getElementById('ctrl-mode').value,
+        total:  parseFloat(document.getElementById('view-total').innerText) || 0,
+        items:  [...feeItems]
+    };
+
+    try {
+        const saved = await apiPost('/api/receipts', record);
+        usingLocalFallback = false;
+        alert(`✅ Receipt #${saved.receiptNo} saved to the database!`);
+    } catch (e) {
+        const receiptNo = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
+        record.receiptNo = receiptNo;
+        record.id = Date.now();
+        history.unshift(record);
+        localStorage.setItem(RECEIPT_COUNTER_KEY, String(receiptNo + 1));
+        localStorage.setItem('receipt_history', JSON.stringify(history));
+        usingLocalFallback = true;
+        alert(`⚠️ Could not reach the database — saved receipt #${receiptNo} locally in this browser instead. Reconnect and it will keep working from here.`);
+    }
+
+    await loadHistory();
     updateDuePanel();
+    syncFields();
+}
+
+function renderHistory() {
+    const body = document.getElementById('history-table-body');
+    body.innerHTML = history.map(rec => {
+        const key = rec._id || rec.id;
+        return `
+        <tr class="hover:bg-gray-50">
+            <td class="p-2 border font-semibold text-xs font-mono-amt">${rec.receiptNo || '—'}</td>
+            <td class="p-2 border text-xs">${rec.date}</td>
+            <td class="p-2 border font-medium">${rec.student}${rec.studentId ? `<br><span class="text-xs text-gray-400">${rec.studentId}</span>` : ''}</td>
+            <td class="p-2 border">${rec.class}</td>
+            <td class="p-2 border text-xs">${rec.mode || 'Cash'}</td>
+            <td class="p-2 border font-bold font-mono-amt" style="color:var(--ledger-green);">₹${rec.total}</td>
+            <td class="p-2 border text-xs text-gray-500">${rec.items.map(i=>i.particular+'('+i.month+')').join(', ')}</td>
+            <td class="p-2 border">
+                <button onclick="loadRecord('${key}')" class="mr-2 underline text-xs" style="color:var(--ink-navy);">Load</button>
+                <button onclick="deleteRecord('${key}')" class="underline text-xs" style="color:var(--maroon);">Delete</button>
+            </td>
+        </tr>
+    `;}).join('');
+}
+
+function loadRecord(key) {
+    const rec = history.find(h => String(h._id || h.id) === String(key));
+    if (rec) {
+        document.getElementById('ctrl-student').value = rec.student;
+        document.getElementById('ctrl-studentid').value = rec.studentId || '';
+        document.getElementById('ctrl-parent').value  = rec.parent;
+        document.getElementById('ctrl-class').value   = rec.class;
+        if (rec.mode) document.getElementById('ctrl-mode').value = rec.mode;
+        if (rec.date) document.getElementById('ctrl-date').value = isoFromDisplay(rec.date);
+        feeItems = rec.items.map((i, idx) => ({ ...i, id: nextId + idx }));
+        nextId += rec.items.length + 1;
+        renderFeeRows();
+        syncFields();
+        document.getElementById('view-receiptno').innerText = rec.receiptNo || '—';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+async function deleteRecord(key) {
+    if (!confirm('Delete this record?')) return;
+    if (!usingLocalFallback) {
+        try {
+            await apiDelete('/api/receipts/' + key);
+            await loadHistory();
+            return;
+        } catch (e) { /* fall through to local removal below */ }
+    }
+    history = history.filter(h => String(h._id || h.id) !== String(key));
+    localStorage.setItem('receipt_history', JSON.stringify(history));
+    renderHistory();
+}
+
+// =============================================
+//  CONCESSION (permanent, tied to student+class, not date)
+// =============================================
+function getConcessionMapKey() {
+    const cls = document.getElementById('ctrl-class').value;
+    const sid = document.getElementById('ctrl-studentid').value.trim().toLowerCase();
+    const name = document.getElementById('ctrl-student').value.trim().toLowerCase();
+    const key = sid || name;
+    return cls + '||' + key;
+}
+
+async function refreshConcessionsCache() {
+    const key = getConcessionMapKey();
+    currentConcessionMap = {};
+    try {
+        const list = await apiGet('/api/concessions/' + encodeURIComponent(key));
+        list.forEach(c => currentConcessionMap[c.particular] = { type: c.type, value: c.value });
+        usingLocalFallback = false;
+    } catch (e) {
+        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
+        const list = all[key] || {};
+        currentConcessionMap = { ...list };
+        usingLocalFallback = true;
+    }
+    renderConcessionListFromCache();
+    updateConnectionBadge();
+}
+
+function renderConcessionListFromCache() {
+    const container = document.getElementById('concession-list');
+    const entries = Object.entries(currentConcessionMap);
+    if (entries.length === 0) {
+        container.innerHTML = '<span class="text-xs text-gray-400">No concessions saved for this student yet.</span>';
+        return;
+    }
+    container.innerHTML = entries.map(([p, c]) => `
+        <span class="fee-chip" style="background:#EFE0B7; color:#5c4408;">
+            ${p}: ${c.type === 'percent' ? c.value + '%' : '₹' + c.value} off
+            <button onclick="removeConcession('${p.replace(/'/g, "\\'")}')" class="ml-1 font-bold" style="color:var(--maroon);">×</button>
+        </span>
+    `).join('');
+}
+
+async function saveConcession() {
+    if (!document.getElementById('ctrl-student').value.trim() && !document.getElementById('ctrl-studentid').value.trim()) {
+        alert('Enter Student Name or Student ID first, so the concession is linked to the right student.');
+        return;
+    }
+    const particular = document.getElementById('conc-particular').value;
+    const type = document.getElementById('conc-type').value;
+    const value = parseFloat(document.getElementById('conc-value').value) || 0;
+    const studentKey = getConcessionMapKey();
+
+    try {
+        await apiPost('/api/concessions', { studentKey, particular, type, value });
+        usingLocalFallback = false;
+    } catch (e) {
+        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
+        if (!all[studentKey]) all[studentKey] = {};
+        all[studentKey][particular] = { type, value };
+        localStorage.setItem(CONCESSION_KEY, JSON.stringify(all));
+        usingLocalFallback = true;
+    }
+
+    await refreshConcessionsCache();
+    onQuickItemChange();
+    document.getElementById('conc-value').value = '';
+}
+
+async function removeConcession(particular) {
+    const studentKey = getConcessionMapKey();
+    try {
+        await apiDelete('/api/concessions/' + encodeURIComponent(studentKey) + '/' + encodeURIComponent(particular));
+        usingLocalFallback = false;
+    } catch (e) {
+        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
+        if (all[studentKey]) delete all[studentKey][particular];
+        localStorage.setItem(CONCESSION_KEY, JSON.stringify(all));
+        usingLocalFallback = true;
+    }
+    await refreshConcessionsCache();
+    onQuickItemChange();
+}
+
+function getConcessionFor(particular) {
+    return currentConcessionMap[particular] || null;
+}
+
+function applyConcessionToAmount(particular, baseAmount) {
+    const c = getConcessionFor(particular);
+    if (!c || !baseAmount) return { final: baseAmount, note: '' };
+    let final = baseAmount;
+    let note = '';
+    if (c.type === 'percent') {
+        final = Math.round(baseAmount * (1 - c.value / 100));
+        note = `(${c.value}% concession applied)`;
+    } else {
+        final = Math.max(0, baseAmount - c.value);
+        note = `(₹${c.value} concession applied)`;
+    }
+    return { final, note };
 }
 
 // =============================================
@@ -335,15 +759,22 @@ function onQuickItemChange() {
     const hint = document.getElementById('quick-fee-hint');
     const amtEl = document.getElementById('quick-amount');
 
-    if (!item || item === 'Custom' || !FEE_STRUCTURE[cls]) {
-        hint.textContent = '';
+    if (!item || !FEE_STRUCTURE[cls]) { hint.textContent = ''; amtEl.value = ''; return; }
+    if (item === 'Custom') { hint.textContent = 'Enter the amount manually.'; amtEl.value = ''; return; }
+
+    const key = ITEM_TO_FEE_KEY[item];
+    const fixedAmt = key ? FEE_STRUCTURE[cls][key] : undefined;
+
+    if (fixedAmt === undefined || fixedAmt === null) {
         amtEl.value = '';
+        hint.textContent = `⚠️ No fixed fee set for ${item} — enter the amount manually.`;
         return;
     }
-    const key = ITEM_TO_FEE_KEY[item];
-    const amt = key ? (FEE_STRUCTURE[cls][key] || 0) : 0;
-    amtEl.value = amt;
-    hint.textContent = `💡 Fee for ${cls}: ₹${amt}`;
+    const { final, note } = applyConcessionToAmount(item, fixedAmt);
+    amtEl.value = final;
+    hint.textContent = note
+        ? `💡 Fee for ${cls}: ₹${fixedAmt} → ₹${final} ${note}`
+        : `💡 Fee for ${cls}: ₹${fixedAmt}`;
 }
 
 function quickAddRow() {
@@ -354,10 +785,9 @@ function quickAddRow() {
     if (!item) { alert('Please select a fee item.'); return; }
     const particular = item === 'Custom' ? 'Other Fee' : item;
 
-    feeItems.push({ id: nextId++, month, particular, amount: amt });
+    feeItems.push({ id: nextId++, month, particular, amount: amt, originalAmount: amt, concessionNote: '' });
     renderFeeRows();
 
-    // Reset quick-add
     document.getElementById('quick-item').value = '';
     document.getElementById('quick-amount').value = '';
     document.getElementById('quick-fee-hint').textContent = '';
@@ -375,7 +805,6 @@ function updateDuePanel() {
     const monthlyFee = fees.monthly;
     const paidMonths = getPaidMonthsFromHistory(cls);
 
-    // Which months are unpaid up to current?
     const unpaidMonths = coveredMonths.filter(m => !paidMonths.includes(m));
     const dueAmount = unpaidMonths.length * monthlyFee;
 
@@ -399,16 +828,22 @@ function updateDuePanel() {
     }).join('');
 
     panel.className = `mb-4 p-4 rounded-xl ${dueAmount === 0 ? 'due-ok' : 'due-overdue'}`;
-    if (dueAmount === 0) totalEl.className = 'text-2xl font-bold text-green-600';
-    else totalEl.className = 'text-2xl font-bold text-red-600';
+    if (dueAmount === 0) totalEl.className = 'text-2xl font-bold font-mono-amt text-green-600';
+    else totalEl.className = 'text-2xl font-bold font-mono-amt text-red-600';
 }
 
 function getPaidMonthsFromHistory(cls) {
-    // Look through saved receipts for this student + class, find which months Tution Fee was paid
+    const studentId = document.getElementById('ctrl-studentid').value.trim().toLowerCase();
     const studentName = document.getElementById('ctrl-student').value.trim().toLowerCase();
     const paid = new Set();
     history.forEach(rec => {
-        if (rec.class === cls && rec.student.trim().toLowerCase() === studentName) {
+        const recId = (rec.studentId || '').trim().toLowerCase();
+        const recName = (rec.student || '').trim().toLowerCase();
+        const matches = rec.class === cls && (
+            (studentId && recId && recId === studentId) ||
+            (!studentId && recName === studentName)
+        );
+        if (matches) {
             rec.items.forEach(item => {
                 if (item.particular && item.particular.toLowerCase().includes('tution')) {
                     paid.add(item.month);
@@ -425,7 +860,7 @@ function getPaidMonthsFromHistory(cls) {
 function addFeeRow() {
     const lastMonth = feeItems.length > 0 ? feeItems[feeItems.length-1].month : 'APR';
     const nextMonth = months[(months.indexOf(lastMonth)+1) % 12];
-    feeItems.push({ id: nextId++, month: nextMonth, particular: 'Tution Fee', amount: 0 });
+    feeItems.push({ id: nextId++, month: nextMonth, particular: 'Tution Fee', amount: 0, originalAmount: 0, concessionNote: '' });
     renderFeeRows();
 }
 
@@ -438,8 +873,8 @@ function updateFee(id, field, value) {
     const item = feeItems.find(i => i.id === id);
     if (item) {
         item[field] = field === 'amount' ? parseFloat(value)||0 : value;
+        if (field === 'amount') { item.originalAmount = item.amount; item.concessionNote = ''; }
         syncCalculations();
-        // Re-render receipt side only
         renderReceiptBody();
     }
 }
@@ -465,11 +900,14 @@ function renderFeeRows(reRenderInputs = true) {
                     <option ${item.particular==='ID Card'?'selected':''}>ID Card</option>
                     <option ${item.particular==='Practical Exam'?'selected':''}>Practical Exam</option>
                     <option ${item.particular==='Registration Fee'?'selected':''}>Registration Fee</option>
+                    <option ${item.particular==='Transport Fee'?'selected':''}>Transport Fee</option>
+                    <option ${item.particular==='Shirt Fee'?'selected':''}>Shirt Fee</option>
+                    <option ${item.particular==='Renewal Fee'?'selected':''}>Renewal Fee</option>
                     <option value="custom" ${!Object.keys(ITEM_TO_FEE_KEY).includes(item.particular)?'selected':''}>Other / Custom</option>
                 </select>
                 <input type="number" value="${item.amount}"
                     oninput="updateFee(${item.id},'amount',this.value)"
-                    placeholder="Amt" class="w-24 p-1 border rounded text-sm">
+                    placeholder="Amt" class="w-24 p-1 border rounded text-sm font-mono-amt">
                 <button onclick="removeFeeRow(${item.id})" class="text-red-500 font-bold px-2 text-lg">×</button>
             </div>
         `).join('');
@@ -487,11 +925,20 @@ function onRowItemChange(id, value) {
         item.particular = value;
         const cls = document.getElementById('ctrl-class').value;
         const key = ITEM_TO_FEE_KEY[value];
-        if (key && FEE_STRUCTURE[cls]) {
-            item.amount = FEE_STRUCTURE[cls][key] || 0;
+        const fixedAmt = key ? FEE_STRUCTURE[cls] && FEE_STRUCTURE[cls][key] : undefined;
+        if (fixedAmt !== undefined && fixedAmt !== null) {
+            const { final, note } = applyConcessionToAmount(value, fixedAmt);
+            item.amount = final;
+            item.originalAmount = fixedAmt;
+            item.concessionNote = note;
+        } else {
+            item.amount = 0;
+            item.originalAmount = 0;
+            item.concessionNote = '';
         }
     } else if (value === 'custom') {
         item.particular = 'Other Fee';
+        item.concessionNote = '';
     }
     renderFeeRows();
 }
@@ -503,8 +950,10 @@ function renderReceiptBody() {
             <div class="col-span-1 border-r border-black p-1">${index+1}</div>
             <div class="col-span-1 border-r border-black p-1"></div>
             <div class="col-span-2 border-r border-black p-1 font-semibold">${item.month}</div>
-            <div class="col-span-6 border-r border-black p-1 text-left px-4">${item.particular}</div>
-            <div class="col-span-2 p-1 text-right px-4 font-semibold">${item.amount}</div>
+            <div class="col-span-6 border-r border-black p-1 text-left px-4">
+                ${item.particular}${item.concessionNote ? `<br><span class="text-xs text-green-600">${item.concessionNote}</span>` : ''}
+            </div>
+            <div class="col-span-2 p-1 text-right px-4 font-semibold font-mono-amt">${item.amount}</div>
         </div>
     `).join('');
 
@@ -524,13 +973,28 @@ function renderReceiptBody() {
 // =============================================
 //  SYNC
 // =============================================
-function syncFields() {
+async function syncFields() {
     document.getElementById('view-student').innerText = document.getElementById('ctrl-student').value || '—';
+    document.getElementById('view-studentid').innerText = document.getElementById('ctrl-studentid').value || '—';
     document.getElementById('view-parent').innerText  = document.getElementById('ctrl-parent').value  || '—';
     document.getElementById('view-class').innerText   = document.getElementById('ctrl-class').value;
     document.getElementById('view-mode').innerText    = document.getElementById('ctrl-mode').value;
+    document.getElementById('view-date').innerText    = formatDateForDisplay(document.getElementById('ctrl-date').value);
+
+    try {
+        const { nextReceiptNo } = await apiGet('/api/receipts/next-number');
+        document.getElementById('view-receiptno').innerText = nextReceiptNo + ' (assigned on save)';
+        usingLocalFallback = false;
+    } catch (e) {
+        const counter = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
+        document.getElementById('view-receiptno').innerText = counter + ' (assigned on save, local)';
+        usingLocalFallback = true;
+    }
+
     onQuickItemChange();
     updateDuePanel();
+    await refreshConcessionsCache();
+    updateConnectionBadge();
 }
 
 function syncCalculations() {
@@ -558,83 +1022,129 @@ function numberToWords(num) {
 }
 
 // =============================================
-//  HISTORY
+//  EXPORT — flat, one row per fee item (proper table structure)
 // =============================================
-function saveToHistory() {
-    const student = document.getElementById('ctrl-student').value.trim();
-    if (!student) { alert('Please enter student name.'); return; }
-    if (feeItems.length === 0) { alert('Please add fee items.'); return; }
-
-    const record = {
-        id: Date.now(),
-        date: document.getElementById('view-date').innerText,
-        student,
-        parent: document.getElementById('ctrl-parent').value,
-        class:  document.getElementById('ctrl-class').value,
-        mode:   document.getElementById('ctrl-mode').value,
-        total:  document.getElementById('view-total').innerText,
-        items:  [...feeItems]
-    };
-    history.unshift(record);
-    localStorage.setItem('receipt_history', JSON.stringify(history));
-    renderHistory();
-    updateDuePanel();
-    alert('✅ Receipt saved!');
-}
-
-function renderHistory() {
-    const body = document.getElementById('history-table-body');
-    body.innerHTML = history.map(rec => `
-        <tr class="hover:bg-gray-50">
-            <td class="p-2 border text-xs">${rec.date}</td>
-            <td class="p-2 border font-medium">${rec.student}</td>
-            <td class="p-2 border">${rec.class}</td>
-            <td class="p-2 border text-xs">${rec.mode || 'Cash'}</td>
-            <td class="p-2 border font-bold text-green-700">₹${rec.total}</td>
-            <td class="p-2 border text-xs text-gray-500">${rec.items.map(i=>i.particular+'('+i.month+')').join(', ')}</td>
-            <td class="p-2 border">
-                <button onclick="loadRecord(${rec.id})" class="text-blue-600 mr-2 underline text-xs">Load</button>
-                <button onclick="deleteRecord(${rec.id})" class="text-red-600 underline text-xs">Delete</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function loadRecord(id) {
-    const rec = history.find(h => h.id === id);
-    if (rec) {
-        document.getElementById('ctrl-student').value = rec.student;
-        document.getElementById('ctrl-parent').value  = rec.parent;
-        document.getElementById('ctrl-class').value   = rec.class;
-        if (rec.mode) document.getElementById('ctrl-mode').value = rec.mode;
-        feeItems = rec.items.map(i => ({ ...i }));
-        renderFeeRows();
-        syncFields();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-}
-
-function deleteRecord(id) {
-    if (confirm('Delete this record?')) {
-        history = history.filter(h => h.id !== id);
-        localStorage.setItem('receipt_history', JSON.stringify(history));
-        renderHistory();
-    }
-}
-
 function exportToExcel() {
     if (history.length === 0) { alert('No history to export.'); return; }
-    let csv = 'data:text/csv;charset=utf-8,Date,Student,Parent,Class,Total,Items\n';
+    const rows = [];
     history.forEach(rec => {
-        const items = rec.items.map(i => `${i.month}:${i.particular}(${i.amount})`).join(' | ');
-        csv += [rec.date, `"${rec.student}"`, `"${rec.parent}"`, rec.class, rec.total, `"${items}"`].join(',') + '\n';
+        rec.items.forEach(item => {
+            rows.push({
+                'Receipt No': rec.receiptNo || '',
+                'Date': rec.date,
+                'Student ID': rec.studentId || '',
+                'Student Name': rec.student,
+                'Parent Name': rec.parent,
+                'Class': rec.class,
+                'Mode': rec.mode || 'Cash',
+                'Month': item.month,
+                'Particular': item.particular,
+                'Original Amount': item.originalAmount ?? item.amount,
+                'Concession': item.concessionNote || '',
+                'Final Amount': item.amount
+            });
+        });
     });
-    const link = document.createElement('a');
-    link.setAttribute('href', encodeURI(csv));
-    link.setAttribute('download', `gplr_receipts_${new Date().toLocaleDateString()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Receipts');
+    XLSX.writeFile(wb, `gplr_receipts_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// =============================================
+//  IMPORT — restore/continue from a previously exported .csv or .xlsx
+// =============================================
+function importReceipts(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const isExcel = file.name.toLowerCase().endsWith('.xlsx');
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        let rows = [];
+        try {
+            if (isExcel) {
+                const wb = XLSX.read(e.target.result, { type: 'binary' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                rows = XLSX.utils.sheet_to_json(sheet);
+            } else {
+                const parsed = Papa.parse(e.target.result, { header: true, skipEmptyLines: true });
+                rows = parsed.data;
+            }
+            mergeImportedRows(rows);
+        } catch (err) {
+            alert('Could not read this file. Please make sure it is a .csv or .xlsx exported from this system.');
+        }
+        event.target.value = '';
+    };
+
+    if (isExcel) reader.readAsBinaryString(file);
+    else reader.readAsText(file);
+}
+
+async function mergeImportedRows(rows) {
+    const grouped = {};
+    rows.forEach(r => {
+        const rNo = r['Receipt No'] || '';
+        const date = r['Date'] || '';
+        const student = r['Student Name'] || r['Student'] || '';
+        const cls = r['Class'] || '';
+        const groupKey = rNo + '||' + date + '||' + student + '||' + cls;
+        if (!grouped[groupKey]) {
+            grouped[groupKey] = {
+                receiptNo: parseInt(rNo) || undefined,
+                date: date,
+                studentId: r['Student ID'] || '',
+                student: student,
+                parent: r['Parent Name'] || '',
+                class: cls,
+                mode: r['Mode'] || 'Cash',
+                items: [],
+                total: 0
+            };
+        }
+        const finalAmt = parseFloat(r['Final Amount'] ?? r['Amount'] ?? 0) || 0;
+        grouped[groupKey].items.push({
+            month: r['Month'] || '',
+            particular: r['Particular'] || '',
+            amount: finalAmt,
+            originalAmount: parseFloat(r['Original Amount']) || finalAmt,
+            concessionNote: r['Concession'] || ''
+        });
+        grouped[groupKey].total += finalAmt;
+    });
+
+    const importedRecords = Object.values(grouped);
+
+    try {
+        const result = await apiPost('/api/receipts/import', { receipts: importedRecords });
+        usingLocalFallback = false;
+        await loadHistory();
+        alert(`✅ Imported ${result.added} receipt(s) into the database. ${result.skipped} duplicate(s) skipped.`);
+        return;
+    } catch (e) {
+        // fall back to local merge
+    }
+
+    const localHistory = JSON.parse(localStorage.getItem('receipt_history')) || [];
+    const existingReceiptNos = new Set(localHistory.map(h => String(h.receiptNo)));
+    let addedCount = 0;
+    importedRecords.forEach(rec => {
+        if (rec.receiptNo && existingReceiptNos.has(String(rec.receiptNo))) return;
+        rec.id = Date.now() + Math.random();
+        localHistory.push(rec);
+        addedCount++;
+    });
+    localHistory.sort((a, b) => (parseInt(b.receiptNo) || 0) - (parseInt(a.receiptNo) || 0));
+    localStorage.setItem('receipt_history', JSON.stringify(localHistory));
+
+    const maxNo = Math.max(0, ...localHistory.map(h => parseInt(h.receiptNo) || 0));
+    const currentCounter = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
+    if (maxNo >= currentCounter) localStorage.setItem(RECEIPT_COUNTER_KEY, String(maxNo + 1));
+
+    usingLocalFallback = true;
+    await loadHistory();
+    alert(`⚠️ Database not reachable — imported ${addedCount} receipt(s) into this browser instead. ${importedRecords.length - addedCount} duplicate(s) skipped.`);
 }
 
 window.onload = init;
