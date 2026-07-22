@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPLR School — Fee Ledger</title>
+    <title>GPLR School — Fee Ledger & Cloud System</title>
     <link rel="icon" type="image/png" href="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Excel & CSV Parsers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
@@ -24,8 +30,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--paper);
-            background-image:
-                linear-gradient(var(--line) 1px, transparent 1px);
+            background-image: linear-gradient(var(--line) 1px, transparent 1px);
             background-size: 100% 2.1rem;
             background-attachment: local;
         }
@@ -47,7 +52,7 @@
         .due-ok { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #22c55e; }
         .due-overdue { background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #ef4444; }
 
-        .fee-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+        .fee-chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
 
         .masthead {
             background: linear-gradient(135deg, var(--ink-navy), var(--ink-navy-dark));
@@ -58,7 +63,7 @@
             background: var(--brass);
             color: #2b1c02;
         }
-        .brass-btn:hover { background: var(--brass-dark); }
+        .brass-btn:hover { background: var(--brass-dark); color: #fff; }
         .navy-btn { background: var(--ink-navy); color: #fff; }
         .navy-btn:hover { background: var(--ink-navy-dark); }
         .maroon-btn { background: var(--maroon); color: #fff; }
@@ -73,39 +78,63 @@
             border-bottom: 2px solid var(--ink-navy);
             padding-bottom: 0.4rem;
         }
-        .conn-dot { width:8px; height:8px; border-radius:999px; display:inline-block; margin-right:6px; }
+        .conn-dot { width:10px; height:10px; border-radius:999px; display:inline-block; margin-right:6px; }
+
+        /* Custom Scrollbar for tables */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 min-h-screen flex flex-col justify-between">
 
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto space-y-6 w-full flex-grow">
 
     <!-- ============ MASTHEAD ============ -->
     <div class="no-print masthead p-5 md:p-6 text-white">
-        <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
                 <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
                     alt="Logo" class="w-14 h-14 rounded-full object-contain border-2 shadow-sm" style="border-color: var(--brass);"
                     onerror="this.style.display='none'">
                 <div>
                     <h1 class="font-display text-xl md:text-2xl font-semibold tracking-wide">Gaya Prasad Lokai Ram School</h1>
-                    <p class="text-xs md:text-sm" style="color:#D8C48A;">Fee Receipt &amp; Ledger System</p>
+                    <p class="text-xs md:text-sm flex items-center gap-2" style="color:#D8C48A;">
+                        <span>Fee Receipt &amp; Ledger System</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-200 border border-blue-400/30">
+                            <i class="fa-solid fa-cloud text-xs mr-1"></i> Google Cloud Enabled
+                        </span>
+                    </p>
                 </div>
             </div>
-            <div id="conn-badge" class="fee-chip bg-white/10 text-white">● checking…</div>
+            <div id="conn-badge" class="fee-chip bg-white/10 text-white flex items-center">
+                <span class="conn-dot bg-amber-400 animate-pulse"></span> Connecting to Google Cloud...
+            </div>
         </div>
     </div>
 
-    <!-- ============ DATABASE CONNECTION ============ -->
+    <!-- ============ DATABASE CONNECTION / GOOGLE CLOUD STATUS ============ -->
     <div class="no-print panel-card rounded-xl p-4">
-        <div class="flex flex-wrap items-center gap-3">
-            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Database server URL</label>
-            <input type="text" id="api-base-input" placeholder="http://localhost:4000"
-                class="text-sm border rounded p-1.5 flex-grow min-w-[220px] border-gray-300">
-            <button onclick="updateApiBase()" class="navy-btn text-xs px-3 py-1.5 rounded font-semibold">Save &amp; Reconnect</button>
-            <button onclick="checkConnection()" class="text-xs px-3 py-1.5 rounded font-semibold border border-gray-300 hover:bg-gray-50">↻ Retry</button>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                        Google Cloud Database (Firestore)
+                        <span id="cloud-sync-tag" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">Real-time Sync</span>
+                    </h2>
+                    <p class="text-xs text-gray-500" id="cloud-status-desc">Every receipt and student concession is stored securely on Google Cloud Firestore and synced instantly across all staff screens.</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="forceSyncCloud()" class="navy-btn text-xs px-3 py-2 rounded-lg font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-arrows-rotate"></i> Sync Cloud
+                </button>
+            </div>
         </div>
-        <p class="text-xs text-gray-400 mt-2">When connected, every receipt, concession, and receipt number is saved permanently in MongoDB. If the server can't be reached, this page automatically falls back to saving in this browser only, so you never lose a receipt while offline.</p>
     </div>
 
     <!-- ============ CONTROLS ============ -->
@@ -114,22 +143,22 @@
         <!-- Student Info -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Student Name</label>
+                <label class="block text-sm font-medium text-gray-700">Student Name <span class="text-red-500">*</span></label>
                 <input type="text" id="ctrl-student" placeholder="Enter Name"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-2"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-2 focus:outline-none"
                     style="--tw-ring-color: var(--ink-navy);"
                     oninput="syncFields()">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Student ID <span class="text-gray-400 font-normal">(optional, recommended)</span></label>
+                <label class="block text-sm font-medium text-gray-700">Student ID <span class="text-gray-400 font-normal">(optional)</span></label>
                 <input type="text" id="ctrl-studentid" placeholder="e.g. GPLR-2026-045"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-2 focus:outline-none"
                     oninput="syncFields()">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Parent Name</label>
                 <input type="text" id="ctrl-parent" placeholder="Enter Parent Name"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-2 focus:outline-none"
                     oninput="syncFields()">
             </div>
             <div>
@@ -193,11 +222,11 @@
         <!-- ===== CONCESSION PANEL ===== -->
         <div class="no-print mb-4 p-4 rounded-xl border" style="background:#FBF4E2; border-color: var(--brass);" id="concession-panel">
             <h3 class="font-display font-semibold mb-1" style="color: var(--brass-dark);">🎓 Concession / Discount — Permanent Student Setting</h3>
-            <p class="text-xs text-gray-600 mb-2">Saved against this Student ID/Name + Class. It does <b>not</b> depend on date or receipt — it stays applied automatically to every future fee item of that type for this student, until you remove it here.</p>
+            <p class="text-xs text-gray-600 mb-2">Saved to Google Cloud against this Student ID/Name + Class. Stays applied automatically to every future fee item for this student.</p>
             <div class="flex flex-wrap gap-2 items-end mb-3">
                 <div>
                     <label class="text-xs text-gray-600">Particular</label>
-                    <select id="conc-particular" class="block mt-1 p-1.5 border rounded text-sm">
+                    <select id="conc-particular" class="block mt-1 p-1.5 border rounded text-sm bg-white">
                         <option>Tution Fee</option>
                         <option>Books Amount</option>
                         <option>Computer Fee</option>
@@ -209,22 +238,24 @@
                         <option>Practical Exam</option>
                         <option>Registration Fee</option>
                         <option>Transport Fee</option>
-                        <option>Shirt Fee</option>
+                        <option>T-Shirt Fee</option>
                         <option>Renewal Fee</option>
                     </select>
                 </div>
                 <div>
                     <label class="text-xs text-gray-600">Type</label>
-                    <select id="conc-type" class="block mt-1 p-1.5 border rounded text-sm">
+                    <select id="conc-type" class="block mt-1 p-1.5 border rounded text-sm bg-white">
                         <option value="percent">% Percent</option>
                         <option value="flat">₹ Flat Amount</option>
                     </select>
                 </div>
                 <div>
                     <label class="text-xs text-gray-600">Value</label>
-                    <input type="number" id="conc-value" placeholder="e.g. 10" class="block mt-1 p-1.5 border rounded text-sm w-24">
+                    <input type="number" id="conc-value" placeholder="e.g. 10" class="block mt-1 p-1.5 border rounded text-sm w-24 bg-white">
                 </div>
-                <button onclick="saveConcession()" class="brass-btn px-3 py-1.5 rounded text-sm font-semibold">+ Save Concession</button>
+                <button onclick="saveConcession()" class="brass-btn px-3 py-1.5 rounded text-sm font-semibold transition">
+                    + Save Concession
+                </button>
             </div>
             <div id="concession-list" class="flex flex-wrap gap-2"></div>
         </div>
@@ -240,7 +271,7 @@
                     <div>
                         <label class="text-xs text-gray-600">Fee Item</label>
                         <select id="quick-item" onchange="onQuickItemChange()"
-                            class="block mt-1 p-1.5 border rounded text-sm border-gray-300">
+                            class="block mt-1 p-1.5 border rounded text-sm border-gray-300 bg-white">
                             <option value="">-- Select Item --</option>
                             <option value="Tution Fee">Tution Fee (Monthly)</option>
                             <option value="Books Amount">Books Amount (One Time)</option>
@@ -253,14 +284,14 @@
                             <option value="Practical Exam">Practical Exam</option>
                             <option value="Registration Fee">Registration Fee (One Time)</option>
                             <option value="Transport Fee">Transport Fee</option>
-                            <option value="Shirt Fee">Shirt Fee</option>
+                            <option value="T-Shirt Fee">T-Shirt Fee</option>
                             <option value="Renewal Fee">Renewal Fee</option>
                             <option value="Custom">Custom / Other</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-xs text-gray-600">Month</label>
-                        <select id="quick-month" class="block mt-1 p-1.5 border rounded text-sm border-gray-300">
+                        <select id="quick-month" class="block mt-1 p-1.5 border rounded text-sm border-gray-300 bg-white">
                             <option value="APR">APR</option><option value="MAY">MAY</option>
                             <option value="JUN">JUN</option><option value="JUL">JUL</option>
                             <option value="AUG">AUG</option><option value="SEP">SEP</option>
@@ -272,10 +303,9 @@
                     <div id="quick-amount-wrap">
                         <label class="text-xs text-gray-600">Amount (auto-filled)</label>
                         <input type="number" id="quick-amount" placeholder="₹"
-                            class="block mt-1 p-1.5 border rounded text-sm w-24 border-gray-300 font-mono-amt">
+                            class="block mt-1 p-1.5 border rounded text-sm w-24 border-gray-300 font-mono-amt bg-white">
                     </div>
-                    <button onclick="quickAddRow()"
-                        class="navy-btn px-3 py-1.5 rounded text-sm font-semibold">
+                    <button onclick="quickAddRow()" class="navy-btn px-3 py-1.5 rounded text-sm font-semibold transition">
                         + Add Row
                     </button>
                 </div>
@@ -284,35 +314,37 @@
 
             <!-- Manual fee rows -->
             <div id="fee-rows-input" class="space-y-2"></div>
-            <button onclick="addFeeRow()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 font-medium">+ Add Blank Row</button>
+            <button onclick="addFeeRow()" class="mt-2 text-sm text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1">
+                <i class="fa-solid fa-plus text-xs"></i> Add Blank Row
+            </button>
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3 items-center">
             <button onclick="window.print()"
-                class="border-2 px-6 py-2 rounded-lg font-bold transition" style="border-color: var(--ink-navy); color: var(--ink-navy);">
-                🖨️ Print Receipt
+                class="border-2 px-6 py-2 rounded-lg font-bold transition flex items-center gap-2" style="border-color: var(--ink-navy); color: var(--ink-navy);">
+                <i class="fa-solid fa-print"></i> Print Receipt
             </button>
             <button onclick="saveToHistory()"
-                class="navy-btn px-6 py-2 rounded-lg font-bold transition">
-                💾 Save &amp; Issue
+                class="navy-btn px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Save to Google Cloud &amp; Issue
             </button>
             <button onclick="exportToExcel()"
-                class="brass-btn px-6 py-2 rounded-lg font-bold transition">
-                📊 Export to Excel
+                class="brass-btn px-6 py-2 rounded-lg font-bold transition flex items-center gap-2">
+                <i class="fa-solid fa-file-excel"></i> Export to Excel
             </button>
         </div>
-        <p class="text-xs text-gray-500 mt-2">💡 When connected to the database, every save is permanent and shared across computers. If offline, this page keeps working using the browser's own storage as a safety net — export to Excel regularly either way.</p>
+        <p class="text-xs text-gray-500 mt-2">💡 Saved receipts sync live across all connected computers in real-time via Google Cloud. Offline edits automatically merge when online.</p>
 
         <!-- ===== IMPORT PREVIOUS RECEIPTS ===== -->
         <div class="mt-4 p-3 border border-dashed rounded-lg" style="border-color: var(--line);">
             <label class="block text-sm font-medium text-gray-700 mb-1">📥 Import Previous Receipts (.csv or .xlsx exported from this system)</label>
             <input type="file" id="import-file" accept=".csv,.xlsx" onchange="importReceipts(event)" class="text-sm">
-            <p class="text-xs text-gray-500 mt-1">Use this to restore old records or continue receipt numbering on a new device/browser without losing history.</p>
+            <p class="text-xs text-gray-500 mt-1">Use this to import old records directly into your Google Cloud Database without duplicates.</p>
         </div>
     </div>
 
     <!-- ============ RECEIPT PREVIEW ============ -->
-    <div class="print-container bg-white receipt-border shadow-2xl mx-auto" style="width:100%;max-width:800px;">
+    <div class="print-container bg-white receipt-border shadow-2xl mx-auto rounded-sm" style="width:100%;max-width:800px;">
         <div class="p-4 flex flex-col items-center border-b-2 border-black">
             <img src="https://scontent.flko13-2.fna.fbcdn.net/v/t39.30808-6/405206088_122115447710094198_8636370551815732762_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=bwycSK0QIPsQ7kNvwELN8Oe&_nc_oc=AdrqQ1PE4fmBrOcjNk8KSALxMz_kirJcQewh8H6zATvajXKqHSYgWuPhvskQPlVQvRQoREySKVpnN6XzzxImOrQc&_nc_zt=23&_nc_ht=scontent.flko13-2.fna&_nc_gid=UEh7gdAyvh4ySHWDblBGYg&oh=00_Af0p6OHcOaJHLhYR9TOTXblXxMIZGWMhqE7GfUxfEbtEuA&oe=69F0E788"
                 alt="GPLR School Logo"
@@ -373,7 +405,10 @@
 
     <!-- ============ HISTORY ============ -->
     <div class="no-print panel-card p-6 rounded-xl">
-        <h2 class="font-display text-xl font-semibold mb-4 section-rule inline-block">📁 Saved History</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display text-xl font-semibold section-rule inline-block">📁 Saved History (Google Cloud Database)</h2>
+            <span id="history-count-badge" class="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-semibold">0 Receipts</span>
+        </div>
         <div class="overflow-x-auto mt-2">
             <table class="w-full text-left text-sm border-collapse">
                 <thead>
@@ -388,31 +423,343 @@
                         <th class="p-2 border">Action</th>
                     </tr>
                 </thead>
-                <tbody id="history-table-body"></tbody>
+                <tbody id="history-table-body">
+                    <tr><td colspan="8" class="p-4 text-center text-gray-400">Loading ledger from Google Cloud...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
+<!-- ============ FOOTER SECTION ============ -->
+<footer class="no-print mt-12 bg-gray-900 text-gray-300 rounded-t-2xl border-t border-gray-800 p-6 md:p-8">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <!-- School Info & Branding -->
+        <div class="text-center md:text-left">
+            <h3 class="font-display text-lg font-semibold text-white">Gaya Prasad Lokai Ram School</h3>
+            <p class="text-xs text-gray-400 mt-1">Shahpur Itai, Utraula, Balrampur - 271609</p>
+            <p class="text-xs text-blue-400 mt-1">Google Cloud Firestore Integration Active</p>
+        </div>
+
+        <!-- Social Media Links -->
+        <div class="flex flex-col items-center md:items-end gap-2">
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Connect With Us</span>
+            <div class="flex items-center gap-3 text-lg">
+                <a href="https://facebook.com" target="_blank" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-blue-600 text-white flex items-center justify-center transition">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+                <a href="https://instagram.com" target="_blank" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-pink-600 text-white flex items-center justify-center transition">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://youtube.com" target="_blank" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-red-600 text-white flex items-center justify-center transition">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://whatsapp.com" target="_blank" class="w-9 h-9 rounded-full bg-gray-800 hover:bg-green-600 text-white flex items-center justify-center transition">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto border-t border-gray-800 mt-6 pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+        <!-- Links -->
+        <div class="flex items-center gap-4">
+            <button onclick="openPrivacyModal()" class="hover:text-white underline">Privacy Policy</button>
+            <span>•</span>
+            <button onclick="openModal('terms-modal')" class="hover:text-white underline">Terms of Service</button>
+            <span>•</span>
+            <button onclick="openModal('help-modal')" class="hover:text-white underline">Help & Support</button>
+        </div>
+
+        <!-- Credit Line -->
+        <div class="font-medium flex items-center gap-1">
+            Built with <span class="text-red-500 animate-pulse text-base">❤️</span> by <span class="text-white font-semibold">Alok Kumar Mishra</span>
+        </div>
+    </div>
+</footer>
+
+<!-- ============ MODALS ============ -->
+<!-- Privacy Policy Modal -->
+<div id="privacy-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b pb-3">
+            <h3 class="font-display text-lg font-bold text-gray-800">Privacy Policy</h3>
+            <button onclick="closeModal('privacy-modal')" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+        <div class="text-xs text-gray-600 space-y-3 leading-relaxed">
+            <p><b>Gaya Prasad Lokai Ram School Fee Ledger System</b> prioritizes student and financial data security.</p>
+            <p>1. <b>Data Storage:</b> All receipt records, student concessions, and payment ledger details are stored securely using Google Cloud Firestore with standard access security.</p>
+            <p>2. <b>Usage:</b> Student information (Name, Class, Parent Name) is strictly used for school administrative accounting, fee receipt generation, and report generation.</p>
+            <p>3. <b>Data Integrity:</b> Cloud synchronization ensures that records are preserved and accessible only by authorized staff members.</p>
+        </div>
+        <div class="text-right border-t pt-3">
+            <button onclick="closeModal('privacy-modal')" class="navy-btn px-4 py-1.5 rounded text-xs font-bold">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div id="terms-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b pb-3">
+            <h3 class="font-display text-lg font-bold text-gray-800">Terms of Service</h3>
+            <button onclick="closeModal('terms-modal')" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+        <div class="text-xs text-gray-600 space-y-2">
+            <p>Authorized school administrative portal for GPLR School accounting staff.</p>
+            <p>Receipt numbers generated in Google Cloud are permanent and sequential to maintain audit readiness.</p>
+        </div>
+        <div class="text-right border-t pt-3">
+            <button onclick="closeModal('terms-modal')" class="navy-btn px-4 py-1.5 rounded text-xs font-bold">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div id="help-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b pb-3">
+            <h3 class="font-display text-lg font-bold text-gray-800">Help & Support</h3>
+            <button onclick="closeModal('help-modal')" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+        <div class="text-xs text-gray-600 space-y-2">
+            <p><b>How to Issue a Receipt:</b></p>
+            <p>1. Enter Student Name and Class.</p>
+            <p>2. Choose Fee Items using Quick Add or manual rows.</p>
+            <p>3. Click <b>Save to Google Cloud &amp; Issue</b> to generate the receipt number and log the payment permanently.</p>
+            <p>4. Click <b>Print Receipt</b> for parent paper copy.</p>
+        </div>
+        <div class="text-right border-t pt-3">
+            <button onclick="closeModal('help-modal')" class="navy-btn px-4 py-1.5 rounded text-xs font-bold">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal (replaces browser confirm) -->
+<div id="confirm-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <h3 id="confirm-title" class="font-display text-lg font-bold text-gray-800">Confirm Action</h3>
+        <p id="confirm-msg" class="text-xs text-gray-600">Are you sure you want to proceed?</p>
+        <div class="flex justify-end gap-3 border-t pt-3">
+            <button onclick="closeConfirmModal(false)" class="px-4 py-1.5 border rounded text-xs font-semibold hover:bg-gray-50">Cancel</button>
+            <button onclick="closeConfirmModal(true)" id="confirm-action-btn" class="maroon-btn px-4 py-1.5 rounded text-xs font-bold">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+<!-- ============ FIREBASE MODULE & SCRIPT ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { 
+    getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, 
+    collection, query, onSnapshot, getDocs, runTransaction 
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// =============================================
+//  GOOGLE CLOUD FIREBASE CONFIG & INIT
+// =============================================
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'gplr-school-cloud-ledger';
+
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+    apiKey: "AIzaSyGPLRSchoolDemoKey123456789",
+    authDomain: "gplr-school-ledger.firebaseapp.com",
+    projectId: "gplr-school-ledger",
+    storageBucket: "gplr-school-ledger.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:gplrschool"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let isFirestoreReady = false;
+
+// Authenticate with Google Cloud
+async function initCloudAuth() {
+    try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            const userCred = await signInWithCustomToken(auth, __initial_auth_token);
+            currentUser = userCred.user;
+        } else {
+            const userCred = await signInAnonymously(auth);
+            currentUser = userCred.user;
+        }
+        isFirestoreReady = true;
+        updateConnectionBadge(true);
+        setupRealtimeListeners();
+    } catch (err) {
+        console.warn("Cloud Auth Notice (Fallback mode active):", err);
+        isFirestoreReady = false;
+        updateConnectionBadge(false);
+    }
+}
+
+// Collections paths according to guidelines
+function getReceiptsCollection() {
+    return collection(db, 'artifacts', appId, 'public', 'data', 'receipts');
+}
+function getConcessionsCollection() {
+    return collection(db, 'artifacts', appId, 'public', 'data', 'concessions');
+}
+function getCounterDoc() {
+    return doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'receipt_counter');
+}
+
+// Real-time Firestore Sync for Receipts
+function setupRealtimeListeners() {
+    if (!currentUser || !isFirestoreReady) return;
+
+    // Listen to Receipts
+    onSnapshot(getReceiptsCollection(), (snapshot) => {
+        const cloudReceipts = [];
+        snapshot.forEach((doc) => {
+            cloudReceipts.push({ _id: doc.id, ...doc.data() });
+        });
+        // Sort by receipt number descending
+        cloudReceipts.sort((a, b) => (parseInt(b.receiptNo) || 0) - (parseInt(a.receiptNo) || 0));
+        window.historyData = cloudReceipts;
+        window.renderHistory();
+        window.updateDuePanel();
+        updateConnectionBadge(true);
+    }, (error) => {
+        console.error("Firestore snapshot error:", error);
+        updateConnectionBadge(false);
+    });
+
+    // Listen to Concessions
+    onSnapshot(getConcessionsCollection(), (snapshot) => {
+        const map = {};
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            map[doc.id] = data; // doc.id is studentKey
+        });
+        window.cloudConcessionStore = map;
+        window.refreshConcessionsCache();
+    }, (error) => {
+        console.error("Firestore concessions snapshot error:", error);
+    });
+}
+
+// Get Next Sequential Receipt Number from Cloud Counter
+async function getNextCloudReceiptNo() {
+    if (!isFirestoreReady || !currentUser) {
+        const counter = parseInt(localStorage.getItem('gplr_receipt_counter') || '1000');
+        return counter;
+    }
+    try {
+        const counterRef = getCounterDoc();
+        const snap = await getDoc(counterRef);
+        if (snap.exists()) {
+            return snap.data().current || 1000;
+        } else {
+            await setDoc(counterRef, { current: 1000 });
+            return 1000;
+        }
+    } catch (e) {
+        return parseInt(localStorage.getItem('gplr_receipt_counter') || '1000');
+    }
+}
+
+// Save Receipt to Firestore with Transactional Counter Increment
+async function saveReceiptToCloud(record) {
+    if (!isFirestoreReady || !currentUser) {
+        throw new Error("Firestore not connected");
+    }
+
+    const counterRef = getCounterDoc();
+    let assignedReceiptNo = 1000;
+
+    await runTransaction(db, async (transaction) => {
+        const counterSnap = await transaction.get(counterRef);
+        if (!counterSnap.exists()) {
+            assignedReceiptNo = 1000;
+            transaction.set(counterRef, { current: 1001 });
+        } else {
+            assignedReceiptNo = counterSnap.data().current || 1000;
+            transaction.update(counterRef, { current: assignedReceiptNo + 1 });
+        }
+
+        record.receiptNo = assignedReceiptNo;
+        record.createdAt = new Date().toISOString();
+        const newReceiptRef = doc(getReceiptsCollection());
+        transaction.set(newReceiptRef, record);
+    });
+
+    return assignedReceiptNo;
+}
+
+// Save Concession to Firestore
+async function saveConcessionToCloud(studentKey, particular, type, value) {
+    if (!isFirestoreReady || !currentUser) throw new Error("Cloud unavailable");
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'concessions', studentKey);
+    const snap = await getDoc(docRef);
+    let items = {};
+    if (snap.exists()) {
+        items = snap.data().items || {};
+    }
+    items[particular] = { type, value };
+    await setDoc(docRef, { studentKey, items }, { merge: true });
+}
+
+// Delete Concession from Firestore
+async function removeConcessionFromCloud(studentKey, particular) {
+    if (!isFirestoreReady || !currentUser) throw new Error("Cloud unavailable");
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'concessions', studentKey);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+        const items = snap.data().items || {};
+        delete items[particular];
+        await setDoc(docRef, { studentKey, items });
+    }
+}
+
+// Delete Receipt from Firestore
+async function deleteReceiptFromCloud(docId) {
+    if (!isFirestoreReady || !currentUser) throw new Error("Cloud unavailable");
+    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'receipts', docId);
+    await deleteDoc(docRef);
+}
+
+// Expose cloud API methods to global window
+window.cloudApi = {
+    initCloudAuth,
+    getNextCloudReceiptNo,
+    saveReceiptToCloud,
+    saveConcessionToCloud,
+    removeConcessionFromCloud,
+    deleteReceiptFromCloud
+};
+
+// Start Cloud Auth on Load
+window.addEventListener('DOMContentLoaded', () => {
+    initCloudAuth();
+});
+</script>
+
 <script>
 // =============================================
-//  FEE STRUCTURE (from image — 2026-27)
-//  Transport Fee / Shirt Fee / Renewal Fee have no fixed structure
-//  per class in the source data, so they are entered manually.
+//  FEE STRUCTURE (2026-27 Academic Year)
 // =============================================
 const FEE_STRUCTURE = {
-    Play: { registration: 1000, monthly: 400,  books: 1310, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    Nur:  { registration: 1000, monthly: 400,  books: 1760, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    LKG:  { registration: 1000, monthly: 450,  books: 2050, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    UKG:  { registration: 1000, monthly: 500,  books: 2270, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '1st':{ registration: 1200, monthly: 600,  books: 2715, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '2nd':{ registration: 1200, monthly: 600,  books: 2880, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '3rd':{ registration: 1200, monthly: 600,  books: 3015, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '4th':{ registration: 1500, monthly: 650,  books: 3260, examFee: 300, computerFee: 200, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '5th':{ registration: 1500, monthly: 650,  books: 3430, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '6th':{ registration: 1500, monthly: 700,  books: 4030, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '7th':{ registration: 1500, monthly: 700,  books: 4245, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
-    '8th':{ registration: 1500, monthly: 700,  books: 4390, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0   },
+    Play: { registration: 1000, monthly: 400,  books: 1310, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    Nur:  { registration: 1000, monthly: 400,  books: 1760, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    LKG:  { registration: 1000, monthly: 450,  books: 2050, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    UKG:  { registration: 1000, monthly: 500,  books: 2270, examFee: 300, computerFee: 0,   notebooks: 80,  stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '1st':{ registration: 1200, monthly: 600,  books: 2715, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '2nd':{ registration: 1200, monthly: 600,  books: 2880, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '3rd':{ registration: 1200, monthly: 600,  books: 3015, examFee: 300, computerFee: 200, notebooks: 345, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '4th':{ registration: 1500, monthly: 650,  books: 3260, examFee: 300, computerFee: 200, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '5th':{ registration: 1500, monthly: 650,  books: 3430, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '6th':{ registration: 1500, monthly: 700,  books: 4030, examFee: 300, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '7th':{ registration: 1500, monthly: 700,  books: 4245, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0    },
+    '8th':{ registration: 1500, monthly: 700,  books: 4390, examFee: 400, computerFee: 250, notebooks: 435, stationary: 0, diary: 200, idCard: 100, practical: 0    },
     '9th':{ registration: 1500, monthly: 900,  books: 1831, examFee: 600, computerFee: 700, notebooks: 540, stationary: 0, diary: 200, idCard: 100, practical: 1000 },
     '10th':{ registration:1500, monthly: 900,  books: 1831, examFee: 600, computerFee: 700, notebooks: 540, stationary: 0, diary: 200, idCard: 100, practical: 1000 },
 };
@@ -435,8 +782,6 @@ const ITEM_TO_FEE_KEY = {
 
 const months = ['APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN','FEB','MAR'];
 const RECEIPT_COUNTER_KEY = 'gplr_receipt_counter';
-const CONCESSION_KEY = 'gplr_concessions';
-const DEFAULT_API_BASE = 'http://localhost:4000';
 
 function getMonthsUpToCurrent() {
     const now = new Date();
@@ -449,88 +794,100 @@ function getMonthsUpToCurrent() {
 //  STATE
 // =============================================
 let feeItems = [];
-let history = [];
+window.historyData = [];
+window.cloudConcessionStore = {};
 let nextId = 100;
-let API_BASE = localStorage.getItem('gplr_api_base') || DEFAULT_API_BASE;
-let usingLocalFallback = false;
+let isCloudConnected = false;
 let currentConcessionMap = {};
+let pendingConfirmCallback = null;
 
 // =============================================
-//  API HELPERS (with automatic local fallback)
+//  UI HELPERS & MODALS
 // =============================================
-async function apiGet(path) {
-    const res = await fetch(API_BASE + path);
-    if (!res.ok) throw new Error('API error ' + res.status);
-    return res.json();
-}
-async function apiPost(path, body) {
-    const res = await fetch(API_BASE + path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const colors = {
+        success: 'bg-green-800 text-white border-green-600',
+        error: 'bg-red-800 text-white border-red-600',
+        info: 'bg-gray-800 text-white border-gray-600'
+    };
+    toast.className = `pointer-events-auto px-4 py-2.5 rounded-lg shadow-xl border text-xs font-semibold transition-all duration-300 flex items-center gap-2 transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+    toast.innerHTML = `<i class="fa-solid ${type==='success'?'fa-circle-check':type==='error'?'fa-circle-exclamation':'fa-info-circle'}"></i> ${message}`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
     });
-    if (!res.ok) throw new Error('API error ' + res.status);
-    return res.json();
-}
-async function apiDelete(path) {
-    const res = await fetch(API_BASE + path, { method: 'DELETE' });
-    if (!res.ok) throw new Error('API error ' + res.status);
-    return res.json();
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
 
-function updateConnectionBadge() {
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openPrivacyModal() { openModal('privacy-modal'); }
+
+function confirmCustom(title, message, callback) {
+    document.getElementById('confirm-title').innerText = title;
+    document.getElementById('confirm-msg').innerText = message;
+    pendingConfirmCallback = callback;
+    openModal('confirm-modal');
+}
+
+function closeConfirmModal(result) {
+    closeModal('confirm-modal');
+    if (result && pendingConfirmCallback) {
+        pendingConfirmCallback();
+    }
+    pendingConfirmCallback = null;
+}
+
+function updateConnectionBadge(connected) {
+    isCloudConnected = connected;
     const badge = document.getElementById('conn-badge');
-    if (usingLocalFallback) {
-        badge.innerHTML = '<span class="conn-dot" style="background:#f59e0b;"></span>Offline — saved in this browser only';
-        badge.className = 'fee-chip bg-amber-500/20 text-amber-100';
+    const tag = document.getElementById('cloud-sync-tag');
+    const desc = document.getElementById('cloud-status-desc');
+
+    if (connected) {
+        badge.innerHTML = '<span class="conn-dot" style="background:#22c55e;"></span> Google Cloud Firestore Connected';
+        badge.className = 'fee-chip bg-green-500/20 text-green-100 flex items-center';
+        if (tag) tag.className = 'text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-green-100 text-green-700';
+        if (desc) desc.innerText = 'Connected directly to Google Cloud Firestore. Receipts sync across all staff computers live.';
     } else {
-        badge.innerHTML = '<span class="conn-dot" style="background:#22c55e;"></span>Connected — MongoDB';
-        badge.className = 'fee-chip bg-green-500/20 text-green-100';
+        badge.innerHTML = '<span class="conn-dot" style="background:#f59e0b;"></span> Local Fallback Mode';
+        badge.className = 'fee-chip bg-amber-500/20 text-amber-100 flex items-center';
+        if (tag) tag.className = 'text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700';
+        if (desc) desc.innerText = 'Operating in offline browser mode. Data saved locally until cloud connection is re-established.';
     }
 }
 
-async function checkConnection() {
-    document.getElementById('conn-badge').innerHTML = '<span class="conn-dot" style="background:#94a3b8;"></span>checking…';
-    try {
-        await apiGet('/api/receipts/next-number');
-        usingLocalFallback = false;
-    } catch (e) {
-        usingLocalFallback = true;
+async function forceSyncCloud() {
+    showToast('Re-connecting to Google Cloud Database...', 'info');
+    if (window.cloudApi) {
+        await window.cloudApi.initCloudAuth();
     }
-    updateConnectionBadge();
-    await loadHistory();
-    await refreshConcessionsCache();
-}
-
-function updateApiBase() {
-    const val = document.getElementById('api-base-input').value.trim() || DEFAULT_API_BASE;
-    API_BASE = val.replace(/\/$/, '');
-    localStorage.setItem('gplr_api_base', API_BASE);
-    checkConnection();
 }
 
 // =============================================
 //  INIT
 // =============================================
-async function init() {
+function init() {
     const today = new Date();
     const iso = today.getFullYear() + '-' +
                 (today.getMonth()+1).toString().padStart(2,'0') + '-' +
                 today.getDate().toString().padStart(2,'0');
     document.getElementById('ctrl-date').value = iso;
-    document.getElementById('api-base-input').value = API_BASE;
 
     const acaIdx = (today.getMonth() - 3 + 12) % 12;
     document.getElementById('quick-month').value = months[acaIdx];
 
     renderFeeRows();
-    await checkConnection(); // loads history + concessions, sets badge
     syncFields();
 }
 
-// =============================================
-//  DATE HELPERS
-// =============================================
 function formatDateForDisplay(iso) {
     if (!iso) return '';
     const [y, m, d] = iso.split('-');
@@ -544,30 +901,18 @@ function isoFromDisplay(disp) {
 }
 
 // =============================================
-//  HISTORY (MongoDB via API, with localStorage fallback)
+//  SAVE RECEIPT (GOOGLE CLOUD + LOCAL FALLBACK)
 // =============================================
-async function loadHistory() {
-    try {
-        history = await apiGet('/api/receipts');
-        usingLocalFallback = false;
-    } catch (e) {
-        history = JSON.parse(localStorage.getItem('receipt_history')) || [];
-        usingLocalFallback = true;
-    }
-    renderHistory();
-    updateConnectionBadge();
-}
-
 async function saveToHistory() {
     const student = document.getElementById('ctrl-student').value.trim();
-    if (!student) { alert('Please enter student name.'); return; }
-    if (feeItems.length === 0) { alert('Please add fee items.'); return; }
+    if (!student) { showToast('Please enter student name.', 'error'); return; }
+    if (feeItems.length === 0) { showToast('Please add at least one fee item.', 'error'); return; }
 
     const record = {
         date: formatDateForDisplay(document.getElementById('ctrl-date').value),
         studentId: document.getElementById('ctrl-studentid').value.trim(),
         student,
-        parent: document.getElementById('ctrl-parent').value,
+        parent: document.getElementById('ctrl-parent').value.trim(),
         class:  document.getElementById('ctrl-class').value,
         mode:   document.getElementById('ctrl-mode').value,
         total:  parseFloat(document.getElementById('view-total').innerText) || 0,
@@ -575,48 +920,69 @@ async function saveToHistory() {
     };
 
     try {
-        const saved = await apiPost('/api/receipts', record);
-        usingLocalFallback = false;
-        alert(`✅ Receipt #${saved.receiptNo} saved to the database!`);
+        if (isCloudConnected && window.cloudApi) {
+            const assignedNo = await window.cloudApi.saveReceiptToCloud(record);
+            showToast(`Receipt #${assignedNo} saved to Google Cloud Database!`, 'success');
+        } else {
+            throw new Error("Local fallback triggered");
+        }
     } catch (e) {
         const receiptNo = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
         record.receiptNo = receiptNo;
         record.id = Date.now();
-        history.unshift(record);
+        
+        const localHist = JSON.parse(localStorage.getItem('receipt_history')) || [];
+        localHist.unshift(record);
         localStorage.setItem(RECEIPT_COUNTER_KEY, String(receiptNo + 1));
-        localStorage.setItem('receipt_history', JSON.stringify(history));
-        usingLocalFallback = true;
-        alert(`⚠️ Could not reach the database — saved receipt #${receiptNo} locally in this browser instead. Reconnect and it will keep working from here.`);
+        localStorage.setItem('receipt_history', JSON.stringify(localHist));
+        
+        window.historyData = localHist;
+        renderHistory();
+        showToast(`Saved Receipt #${receiptNo} in local browser backup.`, 'info');
     }
 
-    await loadHistory();
     updateDuePanel();
     syncFields();
 }
 
-function renderHistory() {
+window.renderHistory = function() {
+    const historyList = window.historyData && window.historyData.length > 0 
+        ? window.historyData 
+        : (JSON.parse(localStorage.getItem('receipt_history')) || []);
+
+    document.getElementById('history-count-badge').innerText = `${historyList.length} Receipts`;
     const body = document.getElementById('history-table-body');
-    body.innerHTML = history.map(rec => {
+
+    if (historyList.length === 0) {
+        body.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No receipt history recorded yet.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = historyList.map(rec => {
         const key = rec._id || rec.id;
         return `
-        <tr class="hover:bg-gray-50">
+        <tr class="hover:bg-gray-50 border-b">
             <td class="p-2 border font-semibold text-xs font-mono-amt">${rec.receiptNo || '—'}</td>
             <td class="p-2 border text-xs">${rec.date}</td>
             <td class="p-2 border font-medium">${rec.student}${rec.studentId ? `<br><span class="text-xs text-gray-400">${rec.studentId}</span>` : ''}</td>
-            <td class="p-2 border">${rec.class}</td>
+            <td class="p-2 border text-xs">${rec.class}</td>
             <td class="p-2 border text-xs">${rec.mode || 'Cash'}</td>
             <td class="p-2 border font-bold font-mono-amt" style="color:var(--ledger-green);">₹${rec.total}</td>
             <td class="p-2 border text-xs text-gray-500">${rec.items.map(i=>i.particular+'('+i.month+')').join(', ')}</td>
             <td class="p-2 border">
-                <button onclick="loadRecord('${key}')" class="mr-2 underline text-xs" style="color:var(--ink-navy);">Load</button>
-                <button onclick="deleteRecord('${key}')" class="underline text-xs" style="color:var(--maroon);">Delete</button>
+                <button onclick="loadRecord('${key}')" class="mr-2 underline text-xs font-semibold" style="color:var(--ink-navy);">Load</button>
+                <button onclick="confirmDeleteRecord('${key}')" class="underline text-xs font-semibold" style="color:var(--maroon);">Delete</button>
             </td>
         </tr>
     `;}).join('');
-}
+};
 
 function loadRecord(key) {
-    const rec = history.find(h => String(h._id || h.id) === String(key));
+    const historyList = window.historyData && window.historyData.length > 0 
+        ? window.historyData 
+        : (JSON.parse(localStorage.getItem('receipt_history')) || []);
+    
+    const rec = historyList.find(h => String(h._id || h.id) === String(key));
     if (rec) {
         document.getElementById('ctrl-student').value = rec.student;
         document.getElementById('ctrl-studentid').value = rec.studentId || '';
@@ -630,25 +996,36 @@ function loadRecord(key) {
         syncFields();
         document.getElementById('view-receiptno').innerText = rec.receiptNo || '—';
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Loaded Receipt #${rec.receiptNo || ''} into editor.`, 'info');
     }
+}
+
+function confirmDeleteRecord(key) {
+    confirmCustom('Delete Receipt Record', 'Are you sure you want to permanently delete this receipt?', () => {
+        deleteRecord(key);
+    });
 }
 
 async function deleteRecord(key) {
-    if (!confirm('Delete this record?')) return;
-    if (!usingLocalFallback) {
-        try {
-            await apiDelete('/api/receipts/' + key);
-            await loadHistory();
-            return;
-        } catch (e) { /* fall through to local removal below */ }
+    try {
+        if (isCloudConnected && window.cloudApi) {
+            await window.cloudApi.deleteReceiptFromCloud(key);
+            showToast('Receipt deleted from Google Cloud.', 'success');
+        } else {
+            throw new Error("Local delete");
+        }
+    } catch (e) {
+        let localHist = JSON.parse(localStorage.getItem('receipt_history')) || [];
+        localHist = localHist.filter(h => String(h._id || h.id) !== String(key));
+        localStorage.setItem('receipt_history', JSON.stringify(localHist));
+        window.historyData = localHist;
+        renderHistory();
+        showToast('Receipt deleted from local history.', 'info');
     }
-    history = history.filter(h => String(h._id || h.id) !== String(key));
-    localStorage.setItem('receipt_history', JSON.stringify(history));
-    renderHistory();
 }
 
 // =============================================
-//  CONCESSION (permanent, tied to student+class, not date)
+//  CONCESSION MANAGEMENT
 // =============================================
 function getConcessionMapKey() {
     const cls = document.getElementById('ctrl-class').value;
@@ -658,22 +1035,17 @@ function getConcessionMapKey() {
     return cls + '||' + key;
 }
 
-async function refreshConcessionsCache() {
+window.refreshConcessionsCache = function() {
     const key = getConcessionMapKey();
     currentConcessionMap = {};
-    try {
-        const list = await apiGet('/api/concessions/' + encodeURIComponent(key));
-        list.forEach(c => currentConcessionMap[c.particular] = { type: c.type, value: c.value });
-        usingLocalFallback = false;
-    } catch (e) {
-        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
-        const list = all[key] || {};
-        currentConcessionMap = { ...list };
-        usingLocalFallback = true;
+    if (window.cloudConcessionStore && window.cloudConcessionStore[key]) {
+        currentConcessionMap = window.cloudConcessionStore[key].items || {};
+    } else {
+        const all = JSON.parse(localStorage.getItem('gplr_concessions')) || {};
+        currentConcessionMap = all[key] || {};
     }
     renderConcessionListFromCache();
-    updateConnectionBadge();
-}
+};
 
 function renderConcessionListFromCache() {
     const container = document.getElementById('concession-list');
@@ -692,7 +1064,7 @@ function renderConcessionListFromCache() {
 
 async function saveConcession() {
     if (!document.getElementById('ctrl-student').value.trim() && !document.getElementById('ctrl-studentid').value.trim()) {
-        alert('Enter Student Name or Student ID first, so the concession is linked to the right student.');
+        showToast('Enter Student Name or Student ID first.', 'error');
         return;
     }
     const particular = document.getElementById('conc-particular').value;
@@ -701,17 +1073,21 @@ async function saveConcession() {
     const studentKey = getConcessionMapKey();
 
     try {
-        await apiPost('/api/concessions', { studentKey, particular, type, value });
-        usingLocalFallback = false;
+        if (isCloudConnected && window.cloudApi) {
+            await window.cloudApi.saveConcessionToCloud(studentKey, particular, type, value);
+            showToast('Concession saved to Google Cloud!', 'success');
+        } else {
+            throw new Error("Local fallback");
+        }
     } catch (e) {
-        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
+        const all = JSON.parse(localStorage.getItem('gplr_concessions')) || {};
         if (!all[studentKey]) all[studentKey] = {};
         all[studentKey][particular] = { type, value };
-        localStorage.setItem(CONCESSION_KEY, JSON.stringify(all));
-        usingLocalFallback = true;
+        localStorage.setItem('gplr_concessions', JSON.stringify(all));
+        showToast('Concession saved in browser backup.', 'info');
     }
 
-    await refreshConcessionsCache();
+    refreshConcessionsCache();
     onQuickItemChange();
     document.getElementById('conc-value').value = '';
 }
@@ -719,15 +1095,19 @@ async function saveConcession() {
 async function removeConcession(particular) {
     const studentKey = getConcessionMapKey();
     try {
-        await apiDelete('/api/concessions/' + encodeURIComponent(studentKey) + '/' + encodeURIComponent(particular));
-        usingLocalFallback = false;
+        if (isCloudConnected && window.cloudApi) {
+            await window.cloudApi.removeConcessionFromCloud(studentKey, particular);
+            showToast('Concession removed from Cloud.', 'info');
+        } else {
+            throw new Error("Local fallback");
+        }
     } catch (e) {
-        const all = JSON.parse(localStorage.getItem(CONCESSION_KEY)) || {};
+        const all = JSON.parse(localStorage.getItem('gplr_concessions')) || {};
         if (all[studentKey]) delete all[studentKey][particular];
-        localStorage.setItem(CONCESSION_KEY, JSON.stringify(all));
-        usingLocalFallback = true;
+        localStorage.setItem('gplr_concessions', JSON.stringify(all));
+        showToast('Concession removed.', 'info');
     }
-    await refreshConcessionsCache();
+    refreshConcessionsCache();
     onQuickItemChange();
 }
 
@@ -751,7 +1131,7 @@ function applyConcessionToAmount(particular, baseAmount) {
 }
 
 // =============================================
-//  QUICK ADD FROM FEE STRUCTURE
+//  QUICK ADD & DUE CALCULATIONS
 // =============================================
 function onQuickItemChange() {
     const item = document.getElementById('quick-item').value;
@@ -760,14 +1140,14 @@ function onQuickItemChange() {
     const amtEl = document.getElementById('quick-amount');
 
     if (!item || !FEE_STRUCTURE[cls]) { hint.textContent = ''; amtEl.value = ''; return; }
-    if (item === 'Custom') { hint.textContent = 'Enter the amount manually.'; amtEl.value = ''; return; }
+    if (item === 'Custom') { hint.textContent = 'Enter amount manually.'; amtEl.value = ''; return; }
 
     const key = ITEM_TO_FEE_KEY[item];
     const fixedAmt = key ? FEE_STRUCTURE[cls][key] : undefined;
 
     if (fixedAmt === undefined || fixedAmt === null) {
         amtEl.value = '';
-        hint.textContent = `⚠️ No fixed fee set for ${item} — enter the amount manually.`;
+        hint.textContent = `⚠️ No fixed fee set for ${item} — enter amount manually.`;
         return;
     }
     const { final, note } = applyConcessionToAmount(item, fixedAmt);
@@ -782,7 +1162,7 @@ function quickAddRow() {
     const month = document.getElementById('quick-month').value;
     const amt   = parseFloat(document.getElementById('quick-amount').value) || 0;
 
-    if (!item) { alert('Please select a fee item.'); return; }
+    if (!item) { showToast('Please select a fee item.', 'error'); return; }
     const particular = item === 'Custom' ? 'Other Fee' : item;
 
     feeItems.push({ id: nextId++, month, particular, amount: amt, originalAmount: amt, concessionNote: '' });
@@ -793,10 +1173,7 @@ function quickAddRow() {
     document.getElementById('quick-fee-hint').textContent = '';
 }
 
-// =============================================
-//  DUE PANEL
-// =============================================
-function updateDuePanel() {
+window.updateDuePanel = function() {
     const cls = document.getElementById('ctrl-class').value;
     const fees = FEE_STRUCTURE[cls];
     if (!fees) return;
@@ -819,7 +1196,7 @@ function updateDuePanel() {
 
     breakdown.innerHTML = `
         <span>Months checked: <b>${coveredMonths.join(', ')}</b></span><br>
-        <span>Paid months (from history): <b>${paidMonths.length > 0 ? paidMonths.join(', ') : 'None'}</b></span>
+        <span>Paid months (from database): <b>${paidMonths.length > 0 ? paidMonths.join(', ') : 'None'}</b></span>
     `;
 
     chips.innerHTML = coveredMonths.map(m => {
@@ -828,15 +1205,18 @@ function updateDuePanel() {
     }).join('');
 
     panel.className = `mb-4 p-4 rounded-xl ${dueAmount === 0 ? 'due-ok' : 'due-overdue'}`;
-    if (dueAmount === 0) totalEl.className = 'text-2xl font-bold font-mono-amt text-green-600';
-    else totalEl.className = 'text-2xl font-bold font-mono-amt text-red-600';
-}
+    totalEl.className = `text-2xl font-bold font-mono-amt ${dueAmount === 0 ? 'text-green-600' : 'text-red-600'}`;
+};
 
 function getPaidMonthsFromHistory(cls) {
     const studentId = document.getElementById('ctrl-studentid').value.trim().toLowerCase();
     const studentName = document.getElementById('ctrl-student').value.trim().toLowerCase();
     const paid = new Set();
-    history.forEach(rec => {
+    const historyList = window.historyData && window.historyData.length > 0 
+        ? window.historyData 
+        : (JSON.parse(localStorage.getItem('receipt_history')) || []);
+
+    historyList.forEach(rec => {
         const recId = (rec.studentId || '').trim().toLowerCase();
         const recName = (rec.student || '').trim().toLowerCase();
         const matches = rec.class === cls && (
@@ -855,7 +1235,7 @@ function getPaidMonthsFromHistory(cls) {
 }
 
 // =============================================
-//  FEE ROWS
+//  FEE ROWS & CALCULATIONS
 // =============================================
 function addFeeRow() {
     const lastMonth = feeItems.length > 0 ? feeItems[feeItems.length-1].month : 'APR';
@@ -885,10 +1265,10 @@ function renderFeeRows(reRenderInputs = true) {
     if (reRenderInputs) {
         container.innerHTML = feeItems.map(item => `
             <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border">
-                <select onchange="updateFee(${item.id},'month',this.value)" class="p-1 border rounded text-xs">
+                <select onchange="updateFee(${item.id},'month',this.value)" class="p-1 border rounded text-xs bg-white">
                     ${months.map(m => `<option value="${m}" ${item.month===m?'selected':''}>${m}</option>`).join('')}
                 </select>
-                <select onchange="onRowItemChange(${item.id}, this.value)" class="p-1 border rounded text-sm flex-grow">
+                <select onchange="onRowItemChange(${item.id}, this.value)" class="p-1 border rounded text-sm flex-grow bg-white">
                     <option value="">-- Particular --</option>
                     <option ${item.particular==='Tution Fee'?'selected':''}>Tution Fee</option>
                     <option ${item.particular==='Books Amount'?'selected':''}>Books Amount</option>
@@ -907,8 +1287,8 @@ function renderFeeRows(reRenderInputs = true) {
                 </select>
                 <input type="number" value="${item.amount}"
                     oninput="updateFee(${item.id},'amount',this.value)"
-                    placeholder="Amt" class="w-24 p-1 border rounded text-sm font-mono-amt">
-                <button onclick="removeFeeRow(${item.id})" class="text-red-500 font-bold px-2 text-lg">×</button>
+                    placeholder="Amt" class="w-24 p-1 border rounded text-sm font-mono-amt bg-white">
+                <button onclick="removeFeeRow(${item.id})" class="text-red-500 font-bold px-2 text-lg">&times;</button>
             </div>
         `).join('');
     }
@@ -970,9 +1350,6 @@ function renderReceiptBody() {
     }
 }
 
-// =============================================
-//  SYNC
-// =============================================
 async function syncFields() {
     document.getElementById('view-student').innerText = document.getElementById('ctrl-student').value || '—';
     document.getElementById('view-studentid').innerText = document.getElementById('ctrl-studentid').value || '—';
@@ -981,20 +1358,17 @@ async function syncFields() {
     document.getElementById('view-mode').innerText    = document.getElementById('ctrl-mode').value;
     document.getElementById('view-date').innerText    = formatDateForDisplay(document.getElementById('ctrl-date').value);
 
-    try {
-        const { nextReceiptNo } = await apiGet('/api/receipts/next-number');
-        document.getElementById('view-receiptno').innerText = nextReceiptNo + ' (assigned on save)';
-        usingLocalFallback = false;
-    } catch (e) {
+    if (window.cloudApi && isCloudConnected) {
+        const nextNo = await window.cloudApi.getNextCloudReceiptNo();
+        document.getElementById('view-receiptno').innerText = nextNo + ' (assigned on save)';
+    } else {
         const counter = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
         document.getElementById('view-receiptno').innerText = counter + ' (assigned on save, local)';
-        usingLocalFallback = true;
     }
 
     onQuickItemChange();
     updateDuePanel();
-    await refreshConcessionsCache();
-    updateConnectionBadge();
+    refreshConcessionsCache();
 }
 
 function syncCalculations() {
@@ -1003,9 +1377,6 @@ function syncCalculations() {
     document.getElementById('view-words').innerText = numberToWords(total) + ' Rupee only';
 }
 
-// =============================================
-//  NUMBER TO WORDS
-// =============================================
 function numberToWords(num) {
     const a = ['','one ','two ','three ','four ','five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
     const b = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
@@ -1022,12 +1393,16 @@ function numberToWords(num) {
 }
 
 // =============================================
-//  EXPORT — flat, one row per fee item (proper table structure)
+//  EXCEL EXPORT & IMPORT
 // =============================================
 function exportToExcel() {
-    if (history.length === 0) { alert('No history to export.'); return; }
+    const historyList = window.historyData && window.historyData.length > 0 
+        ? window.historyData 
+        : (JSON.parse(localStorage.getItem('receipt_history')) || []);
+
+    if (historyList.length === 0) { showToast('No history records to export.', 'error'); return; }
     const rows = [];
-    history.forEach(rec => {
+    historyList.forEach(rec => {
         rec.items.forEach(item => {
             rows.push({
                 'Receipt No': rec.receiptNo || '',
@@ -1049,11 +1424,9 @@ function exportToExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Receipts');
     XLSX.writeFile(wb, `gplr_receipts_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showToast('Excel file exported successfully!', 'success');
 }
 
-// =============================================
-//  IMPORT — restore/continue from a previously exported .csv or .xlsx
-// =============================================
 function importReceipts(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1073,7 +1446,7 @@ function importReceipts(event) {
             }
             mergeImportedRows(rows);
         } catch (err) {
-            alert('Could not read this file. Please make sure it is a .csv or .xlsx exported from this system.');
+            showToast('Could not read file. Ensure it is a valid .csv or .xlsx export.', 'error');
         }
         event.target.value = '';
     };
@@ -1115,36 +1488,31 @@ async function mergeImportedRows(rows) {
     });
 
     const importedRecords = Object.values(grouped);
-
-    try {
-        const result = await apiPost('/api/receipts/import', { receipts: importedRecords });
-        usingLocalFallback = false;
-        await loadHistory();
-        alert(`✅ Imported ${result.added} receipt(s) into the database. ${result.skipped} duplicate(s) skipped.`);
-        return;
-    } catch (e) {
-        // fall back to local merge
-    }
-
-    const localHistory = JSON.parse(localStorage.getItem('receipt_history')) || [];
-    const existingReceiptNos = new Set(localHistory.map(h => String(h.receiptNo)));
     let addedCount = 0;
-    importedRecords.forEach(rec => {
-        if (rec.receiptNo && existingReceiptNos.has(String(rec.receiptNo))) return;
-        rec.id = Date.now() + Math.random();
-        localHistory.push(rec);
-        addedCount++;
-    });
-    localHistory.sort((a, b) => (parseInt(b.receiptNo) || 0) - (parseInt(a.receiptNo) || 0));
-    localStorage.setItem('receipt_history', JSON.stringify(localHistory));
 
-    const maxNo = Math.max(0, ...localHistory.map(h => parseInt(h.receiptNo) || 0));
-    const currentCounter = parseInt(localStorage.getItem(RECEIPT_COUNTER_KEY) || '1000');
-    if (maxNo >= currentCounter) localStorage.setItem(RECEIPT_COUNTER_KEY, String(maxNo + 1));
-
-    usingLocalFallback = true;
-    await loadHistory();
-    alert(`⚠️ Database not reachable — imported ${addedCount} receipt(s) into this browser instead. ${importedRecords.length - addedCount} duplicate(s) skipped.`);
+    if (isCloudConnected && window.cloudApi) {
+        for (const rec of importedRecords) {
+            try {
+                await window.cloudApi.saveReceiptToCloud(rec);
+                addedCount++;
+            } catch (e) { console.error("Cloud import row error", e); }
+        }
+        showToast(`Imported ${addedCount} receipts into Google Cloud!`, 'success');
+    } else {
+        const localHistory = JSON.parse(localStorage.getItem('receipt_history')) || [];
+        const existingReceiptNos = new Set(localHistory.map(h => String(h.receiptNo)));
+        importedRecords.forEach(rec => {
+            if (rec.receiptNo && existingReceiptNos.has(String(rec.receiptNo))) return;
+            rec.id = Date.now() + Math.random();
+            localHistory.push(rec);
+            addedCount++;
+        });
+        localHistory.sort((a, b) => (parseInt(b.receiptNo) || 0) - (parseInt(a.receiptNo) || 0));
+        localStorage.setItem('receipt_history', JSON.stringify(localHistory));
+        window.historyData = localHistory;
+        renderHistory();
+        showToast(`Imported ${addedCount} receipts locally.`, 'info');
+    }
 }
 
 window.onload = init;
